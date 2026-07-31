@@ -12,6 +12,7 @@ export function StaffInchargeDashboardPage() {
     <BookingReviewDashboardPage
       title="Welcome, Staff Incharge"
       userId={userId}
+      role="STAFF_IN_CHARGE"
     />
   );
 }

@@ -31,6 +31,7 @@ export function Header({ onMenuPress }: HeaderProps) {
     localStorage.removeItem('perms_user_name');
     localStorage.removeItem('perms_user_email');
     localStorage.removeItem('perms_user_role');
+    localStorage.removeItem('perms_user_roles');
     router.push('/login');
   };
 

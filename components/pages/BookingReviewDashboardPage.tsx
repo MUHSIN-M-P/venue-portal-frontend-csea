@@ -6,10 +6,12 @@ import { Tabs, TabPanelComponent } from '@/components/Tabs';
 import { BookingCard } from '@/components/BookingCard';
 import { useFetch } from '@/hooks/useFetch';
 import { Booking } from '@/types';
+import { getStoredRoles } from '@/lib/utils';
 
 type BookingStatus =
   | 'PENDING_COORDINATOR'
-  | 'PENDING_VENUE_HANDLER'
+  | 'PENDING_STAFF'
+  | 'PENDING_FACULTY'
   | 'PENDING_HOD'
   | 'APPROVED'
   | 'REJECTED'
@@ -43,6 +45,7 @@ type BookingReviewDashboardPageProps = {
   title: string;
   /** The logged-in user's ID from localStorage (perms_user_id). */
   userId?: string | null;
+  role: string;
 };
 
 function toBooking(apiBooking: ApiBooking): Booking {
@@ -58,20 +61,19 @@ function toBooking(apiBooking: ApiBooking): Booking {
   };
 }
 
-export function BookingReviewDashboardPage({ title, userId }: BookingReviewDashboardPageProps) {
+export function BookingReviewDashboardPage({ title, userId, role }: BookingReviewDashboardPageProps) {
   const { sendRequest: fetchBookings, isLoading } = useFetch<BookingsResponse>();
   const { sendRequest: approveBooking } = useFetch<BookingActionResponse>();
   const { sendRequest: rejectBooking } = useFetch<BookingActionResponse>();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
 
   useEffect(() => {
     // GET /api/bookings — filtering is done server-side via the bearer token.
-    const role = localStorage.getItem('perms_user_role');
-    setUserRole(role);
+    setUserRoles(getStoredRoles());
 
-    fetchBookings('/bookings', { method: 'GET' })
+    fetchBookings(`/bookings?role=${role}`, { method: 'GET' })
       .then((res) => {
         if (res) {
           setBookings((res.data || []).map(toBooking));
@@ -79,7 +81,7 @@ export function BookingReviewDashboardPage({ title, userId }: BookingReviewDashb
         }
       })
       .catch((err) => setError(err.message || 'Unable to load bookings.'));
-  }, [fetchBookings, userId]);
+  }, [fetchBookings, userId, role]);
 
   const handleAction = async (id: string, newStatus: 'approved' | 'rejected') => {
     try {
@@ -100,9 +102,17 @@ export function BookingReviewDashboardPage({ title, userId }: BookingReviewDashb
     }
   };
 
-  const pendingRequests = bookings.filter((booking) =>
-    userRole ? booking.status === ('PENDING_' + userRole.toUpperCase() as Booking['status']) : false
+  const pendingStatuses = new Set<Booking['status']>(
+    userRoles.flatMap((role) => {
+      if (role === 'FACULTY_COORDINATOR') return ['PENDING_COORDINATOR'];
+      if (role === 'STAFF_IN_CHARGE') return ['PENDING_STAFF'];
+      if (role === 'FACULTY_IN_CHARGE') return ['PENDING_FACULTY'];
+      if (role === 'HOD') return ['PENDING_HOD'];
+      return [];
+    }) as Booking['status'][]
   );
+
+  const pendingRequests = bookings.filter((booking) => pendingStatuses.has(booking.status));
   const approvedRequests = bookings.filter((booking) => booking.status === 'APPROVED');
   const rejectedRequests = bookings.filter((booking) => booking.status === 'REJECTED');
 

@@ -3,30 +3,20 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { getPrimaryRouteForRoles, getStoredRoles } from '@/lib/utils';
 
 export default function Home() {
   const router = useRouter();
   useEffect(() => {
     const loggedIn = localStorage.getItem('perms_logged_in');
-    const role = localStorage.getItem('perms_user_role');
     if (!loggedIn) {
       router.push('/login');
       return;
     }
 
-    if (role) {
-      const normalizedRole = role.toUpperCase();
-      const routeMap: Record<string, string> = {
-        'ADMIN': '/admin',
-        'CLUB': '/club',
-        'FACULTY_COORDINATOR': '/faculty_coordinator',
-        'STAFF_IN_CHARGE': '/staff_in_charge',
-        'FACULTY_IN_CHARGE': '/faculty_in_charge',
-        'HOD': '/hod'
-      };
-
-      const targetRoute = routeMap[normalizedRole] || '/login';
-      router.replace(targetRoute);
+    const roles = getStoredRoles();
+    if (roles.length > 0) {
+      router.replace(getPrimaryRouteForRoles(roles));
     } else {
       router.push('/login');
     }

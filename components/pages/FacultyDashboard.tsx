@@ -6,20 +6,30 @@ import { Card, StatCard } from '@/components/Card';
 import { TextArea } from '@/components/TextArea';
 import { useFetch } from '@/hooks/useFetch';
 import { Loader2, AlertCircle } from 'lucide-react';
+import { Booking } from '@/types';
 
 export function FacultyDashboard() {
-  const { data: bookingsData, isLoading: isFetching, error: fetchError, sendRequest: fetchBookings } = useFetch<{ success: boolean; data: any[] }>();
+  const { isLoading: isFetching, error: fetchError, sendRequest: fetchBookings } = useFetch<{ success: boolean; data: any[] }>();
   const { isLoading: isSubmitting, sendRequest: submitAction } = useFetch();
 
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
   const [action, setAction] = useState<'approve' | 'reject' | null>(null);
   const [remarks, setRemarks] = useState('');
+  const [bookings, setBookings] = useState<Booking[]>([]);
   useEffect(() => {
     const userId = typeof window !== 'undefined' ? localStorage.getItem("perms_user_id") : null;
     if (userId) {
       fetchBookings(`/bookings/${userId}`, {
         method: 'GET',
-      });
+      }).then((res) => {
+        if (res) {
+          const raw = res.data;
+          const dataArr = Array.isArray(raw) ? raw : raw ? [raw] : [];
+          setBookings(dataArr.map(toBooking));
+        }
+      }).catch((err) => {
+        console.error('Error fetching bookings:', err);
+      })
     }
   }, [fetchBookings]);
 
@@ -33,7 +43,7 @@ export function FacultyDashboard() {
     if (!selectedRequest || !action) return;
 
     try {
-      const endpoint = `/api/bookings/${selectedRequest.bookingId}/${action}`;
+      const endpoint = `/api/bookings/${selectedRequest.id}/${action}`;
       await submitAction(endpoint, {
         method: 'POST',
         body: { remarks: remarks || (action === 'approve' ? 'Approved' : 'Rejected') },
@@ -43,14 +53,23 @@ export function FacultyDashboard() {
       setSelectedRequest(null);
       setAction(null);
       setRemarks('');
-      fetchBookings('/api/bookings');
+      const userId = typeof window !== 'undefined' ? localStorage.getItem('perms_user_id') : null;
+      if (userId) {
+        const res = await fetchBookings(`/bookings/${userId}`, { method: 'GET' });
+        if (res) {
+          const raw = res.data;
+          const dataArr = Array.isArray(raw) ? raw : raw ? [raw] : [];
+          setBookings(dataArr.map(toBooking));
+        }
+      }
     } catch (err) {
       console.error('Action failed:', err);
     }
   };
 
-  const bookings = bookingsData?.data || [];
-  const pendingRequests = bookings.filter((b: any) => !['APPROVED', 'REJECTED', 'CANCELLED'].includes(b.status));
+  const pendingRequests = bookings.filter((b: { status?: string }) => !['APPROVED', 'REJECTED', 'CANCELLED'].includes(b.status || ''));
+  console.log(bookings, pendingRequests); // Debugging log
+  // bookings is the source of truth for pendingRequests and UI counts
 
   return (
     <div className="space-y-6">
@@ -196,4 +215,89 @@ export function FacultyDashboard() {
       </div>
     </div>
   );
+}
+
+type BookingStatus =
+  | 'PENDING_COORDINATOR'
+  | 'PENDING_STAFF'
+  | 'PENDING_FACULTY'
+  | 'PENDING_HOD'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'CANCELLED'
+  | 'WITHDRAWN';
+
+type ApiBooking = {
+  bookingId: number;
+  clubId?: number;
+  venueId?: number;
+  eventName: string;
+  eventStart: string;
+  eventEnd: string;
+  status: BookingStatus;
+  initialHandlerId?: number | null;
+  actionToken?: string | null;
+  actionTokenExpiry?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  club?: {
+    clubId?: number;
+    clubName?: string;
+    secretaryName?: string;
+    secretaryEmail?: string;
+    contactNumber?: string;
+    facultyCoordinatorId?: number;
+    isActive?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+  };
+  venue?: {
+    venueId?: number;
+    name?: string;
+    venueType?: string;
+    location?: string;
+    capacity?: number;
+    isAvailable?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+  };
+  currentHandlers?: Array<{
+    bookingId: number;
+    handlerId: number;
+    handlerRole: string;
+    handler?: {
+      userId: number;
+      name?: string;
+      email?: string;
+      roles?: Array<{ role: string }>;
+    };
+  }>;
+  logs?: Array<{
+    logId: number;
+    bookingId: number;
+    action: string;
+    performedBy: number;
+    timestamp: string;
+    createdAt?: string;
+    updatedAt?: string;
+    actor?: {
+      userId: number;
+      name?: string;
+      email?: string;
+      roles?: Array<{ role: string }>;
+    };
+  }>;
+};
+
+function toBooking(apiBooking: ApiBooking): Booking {
+  return {
+    id: String(apiBooking.bookingId),
+    title: apiBooking.eventName,
+    venue: apiBooking.venue?.name || `Venue #${apiBooking.bookingId}`,
+    startDate: new Date(apiBooking.eventStart).toLocaleString(),
+    endDate: apiBooking.eventEnd ? new Date(apiBooking.eventEnd).toLocaleString() : undefined,
+    bookingDate: apiBooking.createdAt ? new Date(apiBooking.createdAt).toLocaleDateString() : undefined,
+    status: apiBooking.status,
+    club: apiBooking.club?.clubName,
+  };
 }

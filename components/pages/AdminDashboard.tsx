@@ -5,6 +5,7 @@ import { Button } from "@/components/Button";
 import { Card, StatCard } from "@/components/Card";
 import { Table, TableRow, TableCell } from "@/components/Table";
 import { cn } from "@/lib/utils";
+import { extractRoleValues, hasRole, RoleAssignment } from "@/lib/utils";
 import { useFetch } from "@/hooks/useFetch";
 import { Loader2 } from "lucide-react";
 import { Switch } from "react-aria-components";
@@ -17,7 +18,7 @@ type ApiUser = {
 	userId: number;
 	email: string;
 	name: string;
-	role: string;
+	roles?: RoleAssignment[];
 	profilePicture: string | null;
 	isActive: boolean;
 	createdAt: string;
@@ -26,6 +27,23 @@ type ApiUser = {
 
 type UsersResponse = {
 	users: ApiUser[];
+};
+
+type AuditLogEntry = {
+	logId: number;
+	createdAt?: string;
+	timestamp?: string;
+	action?: string;
+	target?: string;
+	details?: string;
+	remarks?: string;
+	booking?: {
+		eventName?: string;
+	};
+	actor?: {
+		name?: string;
+		email?: string;
+	};
 };
 
 type AdminDashboardProps = {
@@ -72,18 +90,15 @@ export function AdminDashboard({
 	const activeFaculty = users.filter(
 		(u) =>
 			u.isActive &&
-			(u.role === "FACULTY_IN_CHARGE" ||
-				u.role === "FACULTY_COORDINATOR" ||
-				u.role === "HOD"),
+			(hasRole(extractRoleValues(u.roles), "FACULTY_IN_CHARGE") ||
+				hasRole(extractRoleValues(u.roles), "FACULTY_COORDINATOR") ||
+				hasRole(extractRoleValues(u.roles), "HOD")),
 	).length;
 	const activeStaff = users.filter(
-		(u) => u.isActive && u.role === "STAFF_IN_CHARGE",
-	).length;
-	const activeClubs = users.filter(
-		(u) => u.isActive && u.role === "CLUB",
+		(u) => u.isActive && hasRole(extractRoleValues(u.roles), "STAFF_IN_CHARGE"),
 	).length;
 
-	const logs = (auditLogsData as any)?.data || [];
+	const logs = ((auditLogsData as { data?: AuditLogEntry[] })?.data) || [];
 
 	// ── Loading placeholder for stat values ────────────────────────────────
 	const statVal = (val: number) => (isLoadingUsers ? "…" : String(val));
@@ -106,8 +121,8 @@ export function AdminDashboard({
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 							<StatCard title="Total Users" value={statVal(totalUsers)} />
 							<StatCard title="Active Faculty" value={statVal(activeFaculty)} />
+							<StatCard title="Active Staff" value={statVal(activeStaff)} />
 							<StatCard title="Pending Requests" value='12' />
-							<StatCard title="System Uptime" value='99.8%' />
 						</div>
 
 						
@@ -200,12 +215,10 @@ export function AdminDashboard({
 											<TableCell>-</TableCell>
 										</TableRow>
 									) : (
-										logs.map((log: any) => (
+										logs.map((log) => (
 											<TableRow key={log.logId}>
 												<TableCell className="text-xs whitespace-nowrap">
-													{new Date(
-														log.createdAt || log.timestamp,
-													).toLocaleString()}
+													{new Date(log.createdAt || log.timestamp || Date.now()).toLocaleString()}
 												</TableCell>
 												<TableCell>
 													<div className="text-xs font-semibold">

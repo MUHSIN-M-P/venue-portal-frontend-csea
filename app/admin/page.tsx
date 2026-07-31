@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { AdminSidebar } from '@/components/AdminSidebar';
 import { AdminDashboard } from '@/components/pages/AdminDashboard';
+import { getStoredRoles, hasRole } from '@/lib/utils';
 
 type AuthStatus = 'checking' | 'authorized' | 'unauthorized';
 
@@ -19,12 +20,12 @@ export default function AdminPage() {
     let authTimer: ReturnType<typeof setTimeout> | undefined;
     const loggedIn = localStorage.getItem('perms_logged_in');
     const token = localStorage.getItem('perms_token');
-    const role = localStorage.getItem('perms_user_role');
+    const roles = getStoredRoles();
 
-    if (!loggedIn || !token || !role) {
+    if (!loggedIn || !token || roles.length === 0) {
       authTimer = setTimeout(() => setAuthStatus('unauthorized'), 0);
       router.replace('/login');
-    } else if (role.toUpperCase() !== 'ADMIN') {
+    } else if (!hasRole(roles, 'ADMIN')) {
       authTimer = setTimeout(() => setAuthStatus('unauthorized'), 0);
       router.replace('/');
     } else {

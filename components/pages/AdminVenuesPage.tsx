@@ -10,6 +10,15 @@ import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
 import { useFetch } from "@/hooks/useFetch";
 import { cn } from "@/lib/utils";
+import { hasRole, formatRoleLabel, extractRoleValues, RoleAssignment } from "@/lib/utils";
+
+type ApiUser = {
+	userId: number;
+	name: string;
+	email: string;
+	roles?: RoleAssignment[];
+	isActive: boolean;
+};
 
 export function AdminVenuesPage() {
 	const {
@@ -134,13 +143,17 @@ export function AdminVenuesPage() {
 
 		const selectedUserObj = users.find((u: any) => String(u.userId) === handlerId);
 		if (!selectedUserObj) return;
+		const userRoles = extractRoleValues(selectedUserObj.roles);
+		const handlerRole = userRoles.includes("STAFF_IN_CHARGE")
+			? "STAFF_IN_CHARGE"
+			: "FACULTY_IN_CHARGE";
 
 		try {
 			await runHandlerAction(`/api/admin/venues/${venueId}/handlers`, {
 				method: "POST",
 				body: {
 					handlerId: parseInt(handlerId),
-					role: selectedUserObj.role,
+					role: handlerRole,
 				},
 			});
 			setHandlerFormState((prev) => ({ ...prev, [venueId]: "" }));
@@ -168,19 +181,19 @@ export function AdminVenuesPage() {
 		unavailable: venues.filter((v: any) => !v.isAvailable).length,
 	};
 
-	const users = (usersData as any)?.users || [];
+	const users = ((usersData as { users?: ApiUser[] })?.users) || [];
 
 	const getAssignableUsers = (venue: any) => {
 		const assignedHandlerIds = venue?.handlers?.map((h: any) => h.handlerId) || [];
-		return users.filter((u: any) => 
-			(u.role === "STAFF_IN_CHARGE" || u.role === "FACULTY_IN_CHARGE") && 
+		return users.filter((u) => 
+			(hasRole(extractRoleValues(u.roles), "STAFF_IN_CHARGE") || hasRole(extractRoleValues(u.roles), "FACULTY_IN_CHARGE")) && 
 			u.isActive && 
 			!assignedHandlerIds.includes(u.userId)
 		);
 	};
 
-	const assignableModalUsers = users.filter((u: any) => 
-		(u.role === "STAFF_IN_CHARGE" || u.role === "FACULTY_IN_CHARGE") && 
+	const assignableModalUsers = users.filter((u) => 
+			(hasRole(extractRoleValues(u.roles), "STAFF_IN_CHARGE") || hasRole(extractRoleValues(u.roles), "FACULTY_IN_CHARGE")) && 
 		u.isActive && 
 		!selectedHandlers.some((sh) => sh.handlerId === u.userId)
 	);
@@ -356,9 +369,9 @@ export function AdminVenuesPage() {
 																				}))
 																			}
 																			placeholder="Choose a user..."
-																			options={assignable.map((u: any) => ({
+																			options={assignable.map((u) => ({
 																				id: String(u.userId),
-																				label: `${u.name} (${u.role === "STAFF_IN_CHARGE" ? "Staff" : "Faculty"})`,
+																				label: `${u.name} (${hasRole(extractRoleValues(u.roles), "STAFF_IN_CHARGE") ? "Staff" : formatRoleLabel(extractRoleValues(u.roles)[0] || "FACULTY_IN_CHARGE")})`,
 																			}))}
 																		/>
 																	</div>
@@ -532,13 +545,17 @@ export function AdminVenuesPage() {
 
 							<Select
 								placeholder="Select a handler to add..."
-								options={assignableModalUsers.map((u: any) => ({
+								options={assignableModalUsers.map((u) => ({
 									id: String(u.userId),
-									label: `${u.name} (${u.role === "STAFF_IN_CHARGE" ? "Staff" : "Faculty"})`,
+									label: `${u.name} (${hasRole(extractRoleValues(u.roles), "STAFF_IN_CHARGE") ? "Staff" : formatRoleLabel(extractRoleValues(u.roles)[0] || "FACULTY_IN_CHARGE")})`,
 								}))}
 								onSelectionChange={(key) => {
 									const selectedUserObj = users.find((u: any) => String(u.userId) === key);
 									if (selectedUserObj) {
+									const userRoles = selectedUserObj.roles || [];
+									const selectedRole = userRoles.includes("STAFF_IN_CHARGE")
+										? "STAFF_IN_CHARGE"
+										: "FACULTY_IN_CHARGE";
 										setSelectedHandlers((prev) => {
 											if (prev.some((sh) => sh.handlerId === selectedUserObj.userId)) return prev;
 											return [
@@ -546,7 +563,7 @@ export function AdminVenuesPage() {
 												{
 													handlerId: selectedUserObj.userId,
 													name: selectedUserObj.name,
-													role: selectedUserObj.role,
+												role: selectedRole,
 												},
 											];
 										});

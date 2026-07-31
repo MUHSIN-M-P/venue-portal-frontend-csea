@@ -10,6 +10,15 @@ import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
 import { useFetch } from "@/hooks/useFetch";
 import { cn } from "@/lib/utils";
+import { formatRoleLabel, hasRole, extractRoleValues, RoleAssignment } from "@/lib/utils";
+
+type ApiUser = {
+	userId: number;
+	name: string;
+	email: string;
+	roles?: RoleAssignment[];
+	isActive: boolean;
+};
 
 export function AdminClubsPage() {
 	const {
@@ -125,29 +134,29 @@ export function AdminClubsPage() {
 		active: clubs.filter((c: any) => c.isActive !== false).length,
 	};
 
-	const users = (usersData as any)?.users || [];
-	const clubUsers = users.filter((u: any) => u.role === "CLUB" && u.isActive);
+	const users = ((usersData as { users?: ApiUser[] })?.users) || [];
+	const clubUsers = users.filter((u) => hasRole(extractRoleValues(u.roles), "CLUB") && u.isActive);
 	const assignedClubUserIds = clubs.map((c: any) => c.clubId);
 	const availableClubUsers = clubUsers.filter(
 		(u: any) => !assignedClubUserIds.includes(u.userId) || u.userId === parseInt(secretaryUserId || "0"),
 	);
-	const availableClubOptions = availableClubUsers.map((u: any) => ({
+	const availableClubOptions = availableClubUsers.map((u) => ({
 		id: String(u.userId),
 		label: `${u.name} (${u.email})`,
 	}));
 
 	// Filter institutional users for coordinator selection (non-club, non-admin, e.g. faculties/staffs)
 	const facultyUsers = users.filter(
-		(u: any) =>
-			u.role === "FACULTY_COORDINATOR" ||
-			u.role === "FACULTY_IN_CHARGE" ||
-			u.role === "HOD" ||
-			u.role === "STAFF_IN_CHARGE",
+		(u) =>
+			hasRole(extractRoleValues(u.roles), "FACULTY_COORDINATOR") ||
+			hasRole(extractRoleValues(u.roles), "FACULTY_IN_CHARGE") ||
+			hasRole(extractRoleValues(u.roles), "HOD") ||
+			hasRole(extractRoleValues(u.roles), "STAFF_IN_CHARGE"),
 	);
 
-	const facultyOptions = facultyUsers.map((u: any) => ({
+	const facultyOptions = facultyUsers.map((u) => ({
 		id: String(u.userId),
-		label: `${u.name} (${u.role.replace(/_/g, " ")})`,
+		label: `${u.name} (${formatRoleLabel(extractRoleValues(u.roles)[0] || "")})`,
 	}));
 
 	return (

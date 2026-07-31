@@ -15,6 +15,15 @@ import { Modal } from "@/components/Modal";
 import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
 import { useFetch } from "@/hooks/useFetch";
+import { formatRoleLabel, ROLE_OPTIONS, hasRole, extractRoleValues, RoleAssignment } from "@/lib/utils";
+
+type ApiUser = {
+	userId: number;
+	name: string;
+	email: string;
+	roles?: RoleAssignment[];
+	isActive: boolean;
+};
 
 export function AdminPeoplePage() {
 	const {
@@ -36,7 +45,7 @@ export function AdminPeoplePage() {
 	// Form states
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
-	const [role, setRole] = useState("FACULTY_IN_CHARGE");
+	const [roles, setRoles] = useState<string[]>(["FACULTY_IN_CHARGE"]);
 	const [status, setStatus] = useState("available");
 
 	useEffect(() => {
@@ -47,16 +56,16 @@ export function AdminPeoplePage() {
 		setEditId(null);
 		setName("");
 		setEmail("");
-		setRole("FACULTY_IN_CHARGE");
+		setRoles(["FACULTY_IN_CHARGE"]);
 		setStatus("available");
 		setIsOpen(true);
 	};
 
-	const handleOpenEdit = (user: any) => {
+	const handleOpenEdit = (user: ApiUser) => {
 		setEditId(user.userId);
 		setName(user.name);
 		setEmail(user.email);
-		setRole(user.role);
+		setRoles(extractRoleValues(user.roles));
 		setStatus(user.isActive ? "available" : "unavailable");
 		setIsOpen(true);
 	};
@@ -71,7 +80,7 @@ export function AdminPeoplePage() {
 			const payload = {
 				name,
 				email,
-				role,
+				roles,
 				isActive: status === "available",
 			};
 
@@ -80,7 +89,7 @@ export function AdminPeoplePage() {
 					method: "PUT",
 					body: {
 						name: payload.name,
-						role: payload.role,
+						roles: payload.roles,
 						isActive: payload.isActive,
 					},
 				});
@@ -108,16 +117,19 @@ export function AdminPeoplePage() {
 		}
 	};
 
-	const users = (usersData as any)?.users || [];
+	const users = ((usersData as { users?: ApiUser[] })?.users) || [];
 	const totalUsers = users.length;
-	const clubCount = users.filter((u: any) => u.role === "CLUB").length;
+	const clubCount = users.filter((u) => hasRole(extractRoleValues(u.roles), "CLUB")).length;
 	const facultyCount = users.filter(
-		(u: any) => u.role.startsWith("FACULTY") || u.role === "HOD",
+		(u) =>
+			hasRole(extractRoleValues(u.roles), "FACULTY_COORDINATOR") ||
+			hasRole(extractRoleValues(u.roles), "FACULTY_IN_CHARGE") ||
+			hasRole(extractRoleValues(u.roles), "HOD"),
 	).length;
 	const staffCount = users.filter(
-		(u: any) => u.role === "STAFF_IN_CHARGE",
+		(u) => hasRole(extractRoleValues(u.roles), "STAFF_IN_CHARGE"),
 	).length;
-	const adminCount = users.filter((u: any) => u.role === "ADMIN").length;
+	const adminCount = users.filter((u) => hasRole(extractRoleValues(u.roles), "ADMIN")).length;
 
 	return (
 		<div className="space-y-4">
@@ -171,14 +183,14 @@ export function AdminPeoplePage() {
 								<TableCell>-</TableCell>
 							</TableRow>
 						) : (
-							users.map((user: any) => (
+							users.map((user) => (
 								<TableRow key={user.userId}>
 									<TableCell className="font-semibold text-gray-800">
 										{user.name}
 									</TableCell>
 									<TableCell>{user.email}</TableCell>
 									<TableCell>
-										<RoleBadge role={user.role} />
+										<RoleBadge role={extractRoleValues(user.roles)} />
 									</TableCell>
 									<TableCell>
 										<StatusBadge
@@ -236,19 +248,30 @@ export function AdminPeoplePage() {
 						placeholder="e.g. pathari@nitc.ac.in"
 						disabled={editId !== null}
 					/>
-					<Select
-						label="Role"
-						selectedKey={role}
-						onSelectionChange={(key) => setRole(String(key))}
-						options={[
-							{ id: "FACULTY_IN_CHARGE", label: "Faculty In-charge" },
-							{ id: "FACULTY_COORDINATOR", label: "Faculty Coordinator" },
-							{ id: "STAFF_IN_CHARGE", label: "Staff In-charge" },
-							{ id: "HOD", label: "HOD" },
-							{ id: "ADMIN", label: "Admin" },
-							{ id: "CLUB", label: "Club Secretary" },
-						]}
-					/>
+					<div className="space-y-2">
+						<p className="text-xs font-bold uppercase tracking-wider text-text-muted">Roles</p>
+						<div className="flex flex-wrap gap-2">
+							{ROLE_OPTIONS.map((roleOption) => {
+								const selected = roles.includes(roleOption);
+								return (
+									<Button
+										key={roleOption}
+										variant={selected ? "primary" : "outline"}
+										size="sm"
+										onPress={() =>
+											setRoles((current) =>
+												current.includes(roleOption)
+													? current.filter((item) => item !== roleOption)
+													: [...current, roleOption],
+											)
+										}
+									>
+										{formatRoleLabel(roleOption)}
+									</Button>
+								);
+							})}
+						</div>
+					</div>
 					<Select
 						label="Status"
 						selectedKey={status}

@@ -36,7 +36,7 @@ export function ClubDashboardPage() {
 
 	const loadBookings = async () => {
 		try {
-			const bookingsRes: any = await getBookings("/api/bookings");
+			const bookingsRes: any = await getBookings("/api/bookings?role=CLUB");
 			if (bookingsRes && bookingsRes.success) {
 				const formatDate = (dateStr: string) => {
 					const d = new Date(dateStr);
@@ -137,7 +137,7 @@ export function ClubDashboardPage() {
 	// Stat computations
 	const approvedCount = bookings.filter((b) => b.status === "APPROVED").length;
 	const pendingCount = bookings.filter((b) =>
-		["PENDING_VENUE_HANDLER", "PENDING_COORDINATOR", "PENDING_HOD"].includes(b.status)
+		["PENDING_STAFF", "PENDING_FACULTY", "PENDING_COORDINATOR", "PENDING_HOD"].includes(b.status)
 	).length;
 	const rejectedCount = bookings.filter((b) => b.status === "REJECTED").length;
 
@@ -218,7 +218,7 @@ export function ClubDashboardPage() {
 					</TabPanelComponent>
 					<TabPanelComponent id="pending">
 						{bookings.filter((b) =>
-							["PENDING_VENUE_HANDLER", "PENDING_COORDINATOR", "PENDING_HOD"].includes(b.status)
+							["PENDING_STAFF", "PENDING_FACULTY", "PENDING_COORDINATOR", "PENDING_HOD"].includes(b.status)
 						).length === 0 ? (
 							<div className="text-center py-8 text-gray-500 font-medium">
 								No pending booking requests found.
@@ -236,7 +236,7 @@ export function ClubDashboardPage() {
 							>
 								{bookings
 									.filter((b) =>
-										["PENDING_VENUE_HANDLER", "PENDING_COORDINATOR", "PENDING_HOD"].includes(b.status)
+										["PENDING_STAFF", "PENDING_FACULTY", "PENDING_COORDINATOR", "PENDING_HOD"].includes(b.status)
 									)
 									.map((booking) => (
 										<TableRow key={booking.id}>

@@ -4,11 +4,11 @@ import { Role } from '@/types';
 import { Button } from './Button';
 
 type RoleSelectorProps = {
-  currentRole: Role;
-  onRoleChange: (role: Role) => void;
+  currentRoles: Role[];
+  onRoleChange: (roles: Role[]) => void;
 };
 
-export function RoleSelector({ currentRole, onRoleChange }: RoleSelectorProps) {
+export function RoleSelector({ currentRoles, onRoleChange }: RoleSelectorProps) {
   const roles: { id: Role; label: string }[] = [
     { id: 'club', label: 'Club' },
     { id: 'faculty_coordinator', label: 'Faculty Coordinator' },
@@ -24,9 +24,9 @@ export function RoleSelector({ currentRole, onRoleChange }: RoleSelectorProps) {
       {roles.map((role) => (
         <Button
           key={role.id}
-          variant={currentRole === role.id ? 'primary' : 'outline'}
+          variant={currentRoles.includes(role.id) ? 'primary' : 'outline'}
           size="sm"
-          onPress={() => onRoleChange(role.id)}
+          onPress={() => onRoleChange(currentRoles.includes(role.id) ? currentRoles.filter((current) => current !== role.id) : [...currentRoles, role.id])}
         >
           {role.label}
         </Button>

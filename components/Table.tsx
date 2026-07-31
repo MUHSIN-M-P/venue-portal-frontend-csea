@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { formatRoleLabel } from '@/lib/utils';
 import { Table as AriaTable, TableHeader, Column, TableBody, Row, Cell } from 'react-aria-components';
 
 type TableProps = {
@@ -64,7 +65,8 @@ type StatusBadgeProps = {
     | 'available'
     | 'unavailable'
     | 'forwarded'
-    | 'PENDING_VENUE_HANDLER'
+    | 'PENDING_STAFF'
+    | 'PENDING_FACULTY'
     | 'PENDING_COORDINATOR'
     | 'PENDING_HOD'
     | 'APPROVED'
@@ -79,7 +81,8 @@ export function StatusBadge({ status }: StatusBadgeProps) {
     unavailable: 'bg-red-50 text-red-700 border-red-200',
     forwarded: 'bg-blue-50 text-blue-700 border-blue-200',
     APPROVED: 'bg-green-50 text-green-700 border-green-200',
-    PENDING_VENUE_HANDLER: 'bg-amber-50 text-amber-700 border-amber-200',
+    PENDING_STAFF: 'bg-amber-50 text-amber-700 border-amber-200',
+    PENDING_FACULTY: 'bg-amber-50 text-amber-700 border-amber-200',
     PENDING_COORDINATOR: 'bg-amber-50 text-amber-700 border-amber-200',
     PENDING_HOD: 'bg-amber-50 text-amber-700 border-amber-200',
     REJECTED: 'bg-red-50 text-red-700 border-red-200',
@@ -92,7 +95,8 @@ export function StatusBadge({ status }: StatusBadgeProps) {
     unavailable: 'Unavailable',
     forwarded: 'Forwarded',
     APPROVED: 'Approved',
-    PENDING_VENUE_HANDLER: 'Pending (Venue)',
+    PENDING_STAFF: 'Pending (Staff)',
+    PENDING_FACULTY: 'Pending (Faculty)',
     PENDING_COORDINATOR: 'Pending (Coordinator)',
     PENDING_HOD: 'Pending (HOD)',
     REJECTED: 'Rejected',
@@ -108,13 +112,15 @@ export function StatusBadge({ status }: StatusBadgeProps) {
 }
 
 type RoleBadgeProps = {
-  role: string;
+  role: string[];
 };
 
 export function RoleBadge({ role }: RoleBadgeProps) {
+  const label = role.length > 0 ? role.map(formatRoleLabel).join(', ') : '-';
+
   return (
     <span className="px-2.5 py-1 rounded-full font-medium bg-gray-50 border border-gray-200 text-gray-600 text-xs inline-flex items-center">
-      {role}
+      {label}
     </span>
   );
 }

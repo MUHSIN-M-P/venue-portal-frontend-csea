@@ -77,14 +77,14 @@ export type Person = {
   id: string;
   name: string;
   email: string;
-  role: Role;
+  roles: Role[];
   status: 'available' | 'unavailable';
 };
 
 export type Booking = {
   id?: string;
   title: string;
-  status: 'PENDING_VENUE_HANDLER' | 'APPROVED' | 'REJECTED' | 'PENDING_COORDINATOR' | 'PENDING_HOD' | 'CANCELLED' | 'WITHDRAWN';
+  status: 'PENDING_STAFF' | 'PENDING_FACULTY' | 'APPROVED' | 'REJECTED' | 'PENDING_COORDINATOR' | 'PENDING_HOD' | 'CANCELLED' | 'WITHDRAWN';
   venue: string;
   startDate: string;
   endDate?: string;
