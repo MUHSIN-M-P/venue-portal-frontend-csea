@@ -26,7 +26,7 @@ export default function LoginPage() {
 
     setTimeout(() => {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
-      window.location.href = `${backendUrl}/api/auth/login`;
+      window.location.href = `${backendUrl}/api/auth/login?devRole=FACULTY_COORDINATOR`;
     }, 800);
   };
 

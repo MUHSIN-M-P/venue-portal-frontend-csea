@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const HOURS = ['24:00', ...Array.from({ length: 23 }, (_, i) => `${i + 1}:00`)];
+const DAY_ABBREVS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const HOURS = ['00:00', ...Array.from({ length: 23 }, (_, i) => `${String(i + 1).padStart(2, '0')}:00`)];
 
 type SelectionState = {
   dayIndex: number;
@@ -16,39 +16,55 @@ type AvailabilityGridProps = {
   onSelectRange: (startISO: string, endISO: string, rangeText: string) => void;
 };
 
+
 export function AvailabilityGrid({
   selectedVenue = 'SSL Lab',
   selectedVenueId,
   onSelectRange
 }: AvailabilityGridProps) {
-  const [dynamicVenueData, setDynamicVenueData] = useState<Record<string, number[]>>({
-    Mon: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    Tue: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    Wed: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    Thu: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    Fri: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    Sat: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    Sun: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  });
+  const generateVenueData = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const fullNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const grid: Record<string, number[]> = {};
+    Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(now);
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() + i);
+      const key = fullNames[d.getDay()];
+      grid[key] = i === 0
+        ? Array.from({ length: 24 }, (_, h) => (h <= currentHour ? 0 : 1))
+        : Array(24).fill(1);
+    });
+    return grid;
+  };
+  
+  const [dynamicVenueData, setDynamicVenueData] = useState<Record<string, number[]>>(
+    generateVenueData()
+  );
 
   const [selectionStart, setSelectionStart] = useState<SelectionState>(null);
   const [selectionEnd, setSelectionEnd] = useState<SelectionState>(null);
 
-  // Get current week's dates starting from Monday
-  const current = new Date();
-  const day = current.getDay();
-  const diff = current.getDate() - (day === 0 ? 6 : day - 1);
-  const monday = new Date(current.setDate(diff));
-
-  const getDatesForCurrentWeek = () => {
-    const week = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
-      week.push(d);
-    }
-    return week;
+  // Build a 7-day window starting from today
+  const getNext7Days = (): Date[] => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      return d;
+    });
   };
+
+  // Stable alias used throughout the component
+  const getDatesForCurrentWeek = getNext7Days;
+
+  // DAYS drives column order — built from today's weekday names
+  const DAYS = getNext7Days().map(d => {
+    const fullNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return fullNames[d.getDay()];
+  });
 
   useEffect(() => {
     setSelectionStart(null);
@@ -91,15 +107,30 @@ export function AvailabilityGrid({
         if (res.ok) {
           const resData = await res.json();
           if (resData && resData.success && Array.isArray(resData.bookings)) {
-            const grid: Record<string, number[]> = {
-              Mon: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-              Tue: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-              Wed: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-              Thu: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-              Fri: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-              Sat: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-              Sun: [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            };
+                        const generateGrid = (): Record<string, number[]> => {
+                          const now = new Date();
+                          const currentHour = now.getHours();
+                          const grid: Record<string, number[]> = {};
+
+                          // Use the same 7-day window: index 0 = today
+                          getNext7Days().forEach((date, index) => {
+                            const fullNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                            const dayKey = fullNames[date.getDay()];
+                            if (index === 0) {
+                              // Today: hours up to and including current hour are off
+                              grid[dayKey] = Array.from({ length: 24 }, (_, hour) =>
+                                hour <= currentHour ? 0 : 1
+                              );
+                            } else {
+                              // Future days: all available
+                              grid[dayKey] = Array(24).fill(1);
+                            }
+                          });
+
+                          return grid;
+                        };
+
+                        const grid = generateGrid();
 
             const weekDates = getDatesForCurrentWeek();
 
@@ -151,11 +182,10 @@ export function AvailabilityGrid({
     }
   };
 
-  const getDayLabel = (dayName: string, index: number) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + index);
+  const getDayLabel = (_dayName: string, index: number) => {
+    const d = getNext7Days()[index];
     const dateStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
-    return `${dayName} (${dateStr})`;
+    return `${DAY_ABBREVS[d.getDay()]} (${dateStr})`;
   };
 
   const updateRange = (
@@ -202,7 +232,7 @@ export function AvailabilityGrid({
       const hIdx = flatIdx % 24;
       const dLabel = DAYS[dIdx];
       const status = (dynamicVenueData[dLabel] || Array(24).fill(1))[hIdx];
-      return status === 1 || status === 0;
+      return status === 1;
     };
 
     if (flatStart === -1 || flatClicked <= flatStart || selectionEnd !== null) {
@@ -285,7 +315,7 @@ export function AvailabilityGrid({
                         : (flatCurrent >= flatStart && flatCurrent <= flatEnd)
                     );
                     
-                    const isSelectable = status === 1 || status === 0;
+                    const isSelectable = status === 1;
                     
                     let bgClass = getCellColor(status);
                     if (isSelected) {

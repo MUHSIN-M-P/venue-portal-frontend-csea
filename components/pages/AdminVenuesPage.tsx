@@ -553,7 +553,7 @@ export function AdminVenuesPage() {
 									const selectedUserObj = users.find((u: any) => String(u.userId) === key);
 									if (selectedUserObj) {
 									const userRoles = selectedUserObj.roles || [];
-									const selectedRole = userRoles.includes("STAFF_IN_CHARGE")
+									const selectedRole = hasRole(extractRoleValues(userRoles), "STAFF_IN_CHARGE")
 										? "STAFF_IN_CHARGE"
 										: "FACULTY_IN_CHARGE";
 										setSelectedHandlers((prev) => {

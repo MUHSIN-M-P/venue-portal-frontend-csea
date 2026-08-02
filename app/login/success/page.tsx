@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, CheckCircle2 } from 'lucide-react';
-import { extractRoleValues, setStoredRoles } from '@/lib/utils';
+import { extractJwtRoles, setStoredRoles } from '@/lib/utils';
 
 export default function LoginSuccessPage() {
   const router = useRouter();
@@ -50,7 +50,8 @@ export default function LoginSuccessPage() {
       localStorage.setItem('perms_user_id', String(payload.userId));
       localStorage.setItem('perms_user_name', payload.name || 'User');
       localStorage.setItem('perms_user_email', payload.email);
-      setStoredRoles(extractRoleValues(payload.roles) || ['CLUB']);
+      const roles = extractJwtRoles(payload);
+      setStoredRoles(roles.length > 0 ? roles : ['CLUB']);
 
       setStatus('success');
 

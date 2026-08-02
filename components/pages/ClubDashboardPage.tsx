@@ -23,11 +23,11 @@ export function ClubDashboardPage() {
 	}>();
 
 	const [eventName, setEventName] = useState("");
-	const [venue, setVenue] = useState("");
+	const [venue, setVenue] = useState("0");
 	const [description, setDescription] = useState("");
 
 	// Selected schedule state populated by AvailabilityGrid
-	const [startISO, setStartISO] = useState("");
+	const [startISO, setStartISO] = useState("2026-08-02T00:00:00.000Z");
 	const [endISO, setEndISO] = useState("");
 	const [selectedRangeText, setSelectedRangeText] = useState(
 		"No date or time range selected. Click on the availability grid below to choose a time.",
@@ -36,7 +36,7 @@ export function ClubDashboardPage() {
 
 	const loadBookings = async () => {
 		try {
-			const bookingsRes: any = await getBookings("/api/bookings?role=CLUB");
+			const bookingsRes: any = await getBookings("/api/bookings?role=CLUB"); // Remove the role filter to get all bookings
 			if (bookingsRes && bookingsRes.success) {
 				const formatDate = (dateStr: string) => {
 					const d = new Date(dateStr);
@@ -84,6 +84,7 @@ export function ClubDashboardPage() {
 	const venues = venuesRes?.venues || [];
 
 	useEffect(() => {
+
 		if (venues.length > 0 && !venue) {
 			setVenue(String(venues[0].venueId));
 		}
@@ -92,7 +93,7 @@ export function ClubDashboardPage() {
 	const venueOptions =
 		venues.length > 0
 			? venues.map((v: any) => ({ id: String(v.venueId), label: v.name }))
-			: [
+			: [			
 					{ id: "1", label: "SSL Lab" },
 					{ id: "2", label: "NSL Lab" },
 					{ id: "3", label: "Seminar Hall" },
@@ -100,6 +101,8 @@ export function ClubDashboardPage() {
 					{ id: "5", label: "Meeting Room" },
 					{ id: "6", label: "ELHC 402" },
 				];
+	venueOptions.unshift({ id: "0", label: "Select a venue" });
+	console.log("venueOptions", venueOptions);
 
 	const handleSubmit = async () => {
 		if (!eventName || !venue || !startISO || !endISO) {
@@ -110,7 +113,7 @@ export function ClubDashboardPage() {
 		}
 
 		try {
-			const selectedVenueId = parseInt(venue) || 1;
+			const selectedVenueId = parseInt(venue) || 0;
 			const res: any = await addBooking("/api/bookings", {
 				method: "POST",
 				body: {
@@ -144,7 +147,7 @@ export function ClubDashboardPage() {
 	const selectedVenueName =
 		venues.find((v: any) => String(v.venueId) === venue)?.name ||
 		venueOptions.find((o) => o.id === venue)?.label ||
-		"SSL Lab";
+		"Select a venue";
 
 	return (
 		<div className="space-y-6">

@@ -31,6 +31,17 @@ export function extractRoleValues(roleAssignments: readonly RoleAssignment[] | u
   return roleAssignments?.map((assignment) => assignment.role) ?? [];
 }
 
+/** Read effective roles from a JWT payload (prefers `role` over Prisma-style `roles`). */
+export function extractJwtRoles(payload: { role?: unknown; roles?: readonly RoleAssignment[] }) {
+  if (Array.isArray(payload.role)) {
+    return payload.role.filter(
+      (role): role is PortalRole =>
+        typeof role === 'string' && ROLE_OPTIONS.includes(role as PortalRole)
+    );
+  }
+  return extractRoleValues(payload.roles);
+}
+
 export function getStoredRoles() {
   if (typeof window === 'undefined') {
     return [] as PortalRole[];
