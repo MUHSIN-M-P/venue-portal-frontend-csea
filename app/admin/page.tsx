@@ -49,9 +49,9 @@ export default function AdminPage() {
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       <Header onMenuPress={() => setSidebarOpen(true)} />
       <div className="flex grow flex-1 overflow-hidden">
-        <AdminSidebar 
-          activeItem={adminSection} 
-          setActiveItem={setAdminSection} 
+        <AdminSidebar
+          activeItem={adminSection}
+          setActiveItem={setAdminSection}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />

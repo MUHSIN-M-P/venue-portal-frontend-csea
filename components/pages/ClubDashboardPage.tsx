@@ -27,7 +27,7 @@ export function ClubDashboardPage() {
 	const [description, setDescription] = useState("");
 
 	// Selected schedule state populated by AvailabilityGrid
-	const [startISO, setStartISO] = useState("2026-08-02T00:00:00.000Z");
+	const [startISO, setStartISO] = useState(new Date().toISOString());
 	const [endISO, setEndISO] = useState("");
 	const [selectedRangeText, setSelectedRangeText] = useState(
 		"No date or time range selected. Click on the availability grid below to choose a time.",
@@ -83,24 +83,19 @@ export function ClubDashboardPage() {
 
 	const venues = venuesRes?.venues || [];
 
-	useEffect(() => {
 
-		if (venues.length > 0 && !venue) {
-			setVenue(String(venues[0].venueId));
-		}
-	}, [venues, venue]);
 
 	const venueOptions =
 		venues.length > 0
 			? venues.map((v: any) => ({ id: String(v.venueId), label: v.name }))
-			: [			
-					{ id: "1", label: "SSL Lab" },
-					{ id: "2", label: "NSL Lab" },
-					{ id: "3", label: "Seminar Hall" },
-					{ id: "4", label: "APJ Hall" },
-					{ id: "5", label: "Meeting Room" },
-					{ id: "6", label: "ELHC 402" },
-				];
+			: [
+				{ id: "1", label: "SSL Lab" },
+				{ id: "2", label: "NSL Lab" },
+				{ id: "3", label: "Seminar Hall" },
+				{ id: "4", label: "APJ Hall" },
+				{ id: "5", label: "Meeting Room" },
+				{ id: "6", label: "ELHC 402" },
+			];
 	venueOptions.unshift({ id: "0", label: "Select a venue" });
 	console.log("venueOptions", venueOptions);
 
@@ -162,7 +157,7 @@ export function ClubDashboardPage() {
 				</div>
 			</div>
 
-			<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
 				<StatCard title="Pending requests" value={String(pendingCount)} />
 				<StatCard title="Approved requests" value={String(approvedCount)} />
 				<StatCard
@@ -355,24 +350,27 @@ export function ClubDashboardPage() {
 					</div>
 
 					{/* Nested Venue Calendar Grid */}
-					<AvailabilityGrid
-						key={`${venue}-${submitCount}`}
-						selectedVenue={selectedVenueName}
-						selectedVenueId={venue}
-						onSelectRange={(start, end, text) => {
-							setStartISO(start);
-							setEndISO(end);
-							setSelectedRangeText(text);
-						}}
-					/>
-
-					{/* Selected Date-Time display */}
-					<div className="bg-card/20 border border-card-header/40 p-4 rounded-xl text-sm">
-						<span className="font-semibold text-primary">
-							Selected Schedule:{" "}
-						</span>
-						<span className="text-gray-700">{selectedRangeText}</span>
-					</div>
+					{venue !== "0" && venue !== "" ? (
+						<>
+							<AvailabilityGrid
+								key={`${venue}-${submitCount}`}
+								selectedVenue={selectedVenueName}
+								selectedVenueId={venue}
+								onSelectRange={(start, end, text) => {
+									setStartISO(start);
+									setEndISO(end);
+									setSelectedRangeText(text);
+								}}
+							/>
+							{/* Selected Date-Time display */}
+							<div className="bg-card/20 border border-card-header/40 p-4 rounded-xl text-sm">
+								<span className="font-semibold text-primary">
+									Selected Schedule:{" "}
+								</span>
+								<span className="text-gray-700">{selectedRangeText}</span>
+							</div>
+						</>
+					) : null}
 
 					{/* Description & Action */}
 					<div className="space-y-4">

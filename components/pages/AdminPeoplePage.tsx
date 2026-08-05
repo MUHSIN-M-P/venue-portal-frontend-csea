@@ -14,6 +14,7 @@ import { Plus, Loader2, AlertCircle } from "lucide-react";
 import { Modal } from "@/components/Modal";
 import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
+import { RoleSelector } from "@/components/RoleSelector";
 import { useFetch } from "@/hooks/useFetch";
 import { formatRoleLabel, ROLE_OPTIONS, hasRole, extractRoleValues, RoleAssignment } from "@/lib/utils";
 
@@ -62,10 +63,12 @@ export function AdminPeoplePage() {
 	};
 
 	const handleOpenEdit = (user: ApiUser) => {
+		const rawRoles = user.roles || (user as any).role;
+		const extractedRoles = extractRoleValues(rawRoles);
 		setEditId(user.userId);
 		setName(user.name);
 		setEmail(user.email);
-		setRoles(extractRoleValues(user.roles));
+		setRoles(extractedRoles);
 		setStatus(user.isActive ? "available" : "unavailable");
 		setIsOpen(true);
 	};
@@ -190,7 +193,7 @@ export function AdminPeoplePage() {
 									</TableCell>
 									<TableCell>{user.email}</TableCell>
 									<TableCell>
-										<RoleBadge role={extractRoleValues(user.roles)} />
+										<RoleBadge role={extractRoleValues(user.roles || (user as any).role)} />
 									</TableCell>
 									<TableCell>
 										<StatusBadge
@@ -250,27 +253,10 @@ export function AdminPeoplePage() {
 					/>
 					<div className="space-y-2">
 						<p className="text-xs font-bold uppercase tracking-wider text-text-muted">Roles</p>
-						<div className="flex flex-wrap gap-2">
-							{ROLE_OPTIONS.map((roleOption) => {
-								const selected = roles.includes(roleOption);
-								return (
-									<Button
-										key={roleOption}
-										variant={selected ? "primary" : "outline"}
-										size="sm"
-										onPress={() =>
-											setRoles((current) =>
-												current.includes(roleOption)
-													? current.filter((item) => item !== roleOption)
-													: [...current, roleOption],
-											)
-										}
-									>
-										{formatRoleLabel(roleOption)}
-									</Button>
-								);
-							})}
-						</div>
+						<RoleSelector
+							currentRoles={roles}
+							onRoleChange={(newRoles) => setRoles(newRoles)}
+						/>
 					</div>
 					<Select
 						label="Status"

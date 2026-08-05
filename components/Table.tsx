@@ -116,11 +116,24 @@ type RoleBadgeProps = {
 };
 
 export function RoleBadge({ role }: RoleBadgeProps) {
-  const label = role.length > 0 ? role.map(formatRoleLabel).join(', ') : '-';
+  if (!role || role.length === 0) {
+    return (
+      <span className="px-2.5 py-1 rounded-full font-medium bg-gray-50 border border-gray-200 text-gray-600 text-xs inline-flex items-center">
+        -
+      </span>
+    );
+  }
 
   return (
-    <span className="px-2.5 py-1 rounded-full font-medium bg-gray-50 border border-gray-200 text-gray-600 text-xs inline-flex items-center">
-      {label}
-    </span>
+    <div className="flex flex-wrap gap-1">
+      {role.map((r) => (
+        <span
+          key={r}
+          className="px-2.5 py-1 rounded-full font-medium bg-gray-50 border border-gray-200 text-gray-600 text-xs inline-flex items-center"
+        >
+          {formatRoleLabel(r)}
+        </span>
+      ))}
+    </div>
   );
 }

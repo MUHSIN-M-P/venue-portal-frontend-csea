@@ -27,19 +27,29 @@ export function hasRole(roles: readonly PortalRole[] | undefined, role: PortalRo
   return roles?.includes(role) ?? false;
 }
 
-export function extractRoleValues(roleAssignments: readonly RoleAssignment[] | undefined) {
-  return roleAssignments?.map((assignment) => assignment.role) ?? [];
+export function extractRoleValues(roleAssignments: any): PortalRole[] {
+  if (!roleAssignments) return [];
+  const list = Array.isArray(roleAssignments) ? roleAssignments : [roleAssignments];
+  const results: PortalRole[] = [];
+
+  for (const item of list) {
+    const val = typeof item === 'string' ? item : item?.role || item?.name;
+    if (typeof val === 'string') {
+      const upper = val.trim().toUpperCase() as PortalRole;
+      if (ROLE_OPTIONS.includes(upper) && !results.includes(upper)) {
+        results.push(upper);
+      }
+    }
+  }
+
+  return results;
 }
 
-/** Read effective roles from a JWT payload (prefers `role` over Prisma-style `roles`). */
-export function extractJwtRoles(payload: { role?: unknown; roles?: readonly RoleAssignment[] }) {
-  if (Array.isArray(payload.role)) {
-    return payload.role.filter(
-      (role): role is PortalRole =>
-        typeof role === 'string' && ROLE_OPTIONS.includes(role as PortalRole)
-    );
-  }
-  return extractRoleValues(payload.roles);
+/** Read effective roles from a JWT payload or user object */
+export function extractJwtRoles(payload: any): PortalRole[] {
+  if (!payload || typeof payload !== 'object') return [];
+  const raw = payload.roles ?? payload.role ?? payload.user?.roles ?? payload.user?.role;
+  return extractRoleValues(raw);
 }
 
 export function getStoredRoles() {

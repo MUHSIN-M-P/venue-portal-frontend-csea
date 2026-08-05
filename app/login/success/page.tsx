@@ -51,7 +51,7 @@ export default function LoginSuccessPage() {
       localStorage.setItem('perms_user_name', payload.name || 'User');
       localStorage.setItem('perms_user_email', payload.email);
       const roles = extractJwtRoles(payload);
-      setStoredRoles(roles.length > 0 ? roles : ['CLUB']);
+      setStoredRoles(roles.length > 0 ? roles : ['ADMIN']);
 
       setStatus('success');
 

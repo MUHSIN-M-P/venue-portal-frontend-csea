@@ -25,6 +25,8 @@ type ApiBooking = {
   eventEnd: string;
   status: BookingStatus;
   createdAt?: string;
+  remarks?: string;
+  description?: string;
   club?: { clubName?: string };
   venue?: { name?: string };
 };
@@ -53,11 +55,12 @@ function toBooking(apiBooking: ApiBooking): Booking {
     id: String(apiBooking.bookingId),
     title: apiBooking.eventName,
     venue: apiBooking.venue?.name || `Venue #${apiBooking.bookingId}`,
-    startDate: new Date(apiBooking.eventStart).toLocaleString(),
-    endDate: new Date(apiBooking.eventEnd).toLocaleString(),
+    startDate: apiBooking.eventStart,
+    endDate: apiBooking.eventEnd,
     bookingDate: apiBooking.createdAt ? new Date(apiBooking.createdAt).toLocaleDateString() : '',
     status: apiBooking.status,
     club: apiBooking.club?.clubName,
+    subject: apiBooking.remarks || apiBooking.description || 'No additional remarks provided.',
   };
 }
 
@@ -129,7 +132,7 @@ export function BookingReviewDashboardPage({ title, userId, role }: BookingRevie
         </div>
       )}
 
-      <div className="flex gap-4 flex-wrap">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
         <StatCard title="Pending requests" value={isLoading ? '...' : String(pendingRequests.length)} variant="danger" />
         <StatCard title="Approved this month" value={isLoading ? '...' : String(approvedRequests.length)} />
       </div>

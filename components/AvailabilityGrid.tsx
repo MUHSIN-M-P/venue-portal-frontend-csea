@@ -145,8 +145,6 @@ export function AvailabilityGrid({
               DAYS.forEach((day, dayIndex) => {
                 const date = weekDates[dayIndex];
                 for (let hourIndex = 0; hourIndex < 24; hourIndex++) {
-                  if (hourIndex === 0 || hourIndex === 1) continue;
-
                   const slotStart = new Date(date);
                   slotStart.setHours(hourIndex, 0, 0, 0);
 
@@ -199,7 +197,8 @@ export function AvailabilityGrid({
     const startObj = new Date(startDate);
     startObj.setHours(startHour, 0, 0, 0);
 
-    const endObj = new Date(weekDates[end ? end.dayIndex : start.dayIndex]);
+    const endDate = weekDates[end ? end.dayIndex : start.dayIndex];
+    const endObj = new Date(endDate);
     const endHour = end ? end.hourIndex + 1 : start.hourIndex + 1;
     endObj.setHours(endHour, 0, 0, 0);
 
@@ -208,10 +207,10 @@ export function AvailabilityGrid({
       return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
     };
 
-    const padHour = (h: number) => String(h).padStart(2, '0') + ':00';
-    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const startDayName = dayNames[start.dayIndex];
-    const endDayName = dayNames[end ? end.dayIndex : start.dayIndex];
+    const padHour = (h: number) => String(h % 24).padStart(2, '0') + ':00';
+    const fullNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const startDayName = fullNames[startDate.getDay()];
+    const endDayName = fullNames[endObj.getDay()];
 
     let rangeText = '';
     if (!end || start.dayIndex === end.dayIndex) {

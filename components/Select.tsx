@@ -16,6 +16,7 @@ type SelectProps = {
   selectedKey?: string;
   onSelectionChange?: (key: string) => void;
   className?: string;
+  isDisabled?: boolean;
 };
 
 export function Select({
@@ -25,9 +26,11 @@ export function Select({
   selectedKey,
   onSelectionChange,
   className,
+  isDisabled = false,
 }: SelectProps) {
   return (
     <AriaSelect
+      isDisabled={isDisabled}
       selectedKey={selectedKey || undefined}
       onSelectionChange={(key) => onSelectionChange?.(key as string)}
       className={cn('flex flex-col gap-1.5 w-full', className)}

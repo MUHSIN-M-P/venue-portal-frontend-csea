@@ -1,36 +1,39 @@
 'use client';
 
-import { Role } from '@/types';
+import { ROLE_OPTIONS, PortalRole, formatRoleLabel } from '@/lib/utils';
 import { Button } from './Button';
 
 type RoleSelectorProps = {
-  currentRoles: Role[];
-  onRoleChange: (roles: Role[]) => void;
+  currentRoles: (PortalRole | string)[];
+  onRoleChange: (roles: PortalRole[]) => void;
+  className?: string;
 };
 
-export function RoleSelector({ currentRoles, onRoleChange }: RoleSelectorProps) {
-  const roles: { id: Role; label: string }[] = [
-    { id: 'club', label: 'Club' },
-    { id: 'faculty_coordinator', label: 'Faculty Coordinator' },
-    { id: 'staff_in_charge', label: 'Staff In-charge' },
-    { id: 'faculty_in_charge', label: 'Faculty In-charge' },
-    { id: 'hod', label: 'HOD' },
-    { id: 'admin', label: 'Admin' },
-  ];
-
+export function RoleSelector({ currentRoles, onRoleChange, className }: RoleSelectorProps) {
+  const toggleRole = (role: PortalRole) => {
+    if (currentRoles.includes(role)) {
+      onRoleChange(currentRoles.filter((r) => r !== role) as PortalRole[]);
+    } else {
+      onRoleChange([...currentRoles, role] as PortalRole[]);
+    }
+  };
 
   return (
-    <div className="px-8 py-4 bg-[#f4d9c6] flex gap-2 flex-wrap">
-      {roles.map((role) => (
-        <Button
-          key={role.id}
-          variant={currentRoles.includes(role.id) ? 'primary' : 'outline'}
-          size="sm"
-          onPress={() => onRoleChange(currentRoles.includes(role.id) ? currentRoles.filter((current) => current !== role.id) : [...currentRoles, role.id])}
-        >
-          {role.label}
-        </Button>
-      ))}
+    <div className={className || "flex flex-wrap gap-2"}>
+      {ROLE_OPTIONS.map((roleOption) => {
+        const isSelected = currentRoles.includes(roleOption);
+        return (
+          <Button
+            key={roleOption}
+            type="button"
+            variant={isSelected ? 'primary' : 'outline'}
+            size="sm"
+            onPress={() => toggleRole(roleOption)}
+          >
+            {formatRoleLabel(roleOption)}
+          </Button>
+        );
+      })}
     </div>
   );
 }

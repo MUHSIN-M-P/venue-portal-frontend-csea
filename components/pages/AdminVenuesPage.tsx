@@ -185,18 +185,18 @@ export function AdminVenuesPage() {
 
 	const getAssignableUsers = (venue: any) => {
 		const assignedHandlerIds = venue?.handlers?.map((h: any) => h.handlerId) || [];
-		return users.filter((u) => 
-			(hasRole(extractRoleValues(u.roles), "STAFF_IN_CHARGE") || hasRole(extractRoleValues(u.roles), "FACULTY_IN_CHARGE")) && 
-			u.isActive && 
-			!assignedHandlerIds.includes(u.userId)
-		);
+		return users.filter((u) => {
+			const uRoles = extractRoleValues(u.roles || (u as any).role);
+			const isEligible = uRoles.includes("STAFF_IN_CHARGE") || uRoles.includes("FACULTY_IN_CHARGE");
+			return isEligible && u.isActive && !assignedHandlerIds.includes(u.userId);
+		});
 	};
 
-	const assignableModalUsers = users.filter((u) => 
-			(hasRole(extractRoleValues(u.roles), "STAFF_IN_CHARGE") || hasRole(extractRoleValues(u.roles), "FACULTY_IN_CHARGE")) && 
-		u.isActive && 
-		!selectedHandlers.some((sh) => sh.handlerId === u.userId)
-	);
+	const assignableModalUsers = users.filter((u) => {
+		const uRoles = extractRoleValues(u.roles || (u as any).role);
+		const isEligible = uRoles.includes("STAFF_IN_CHARGE") || uRoles.includes("FACULTY_IN_CHARGE");
+		return isEligible && u.isActive && !selectedHandlers.some((sh) => sh.handlerId === u.userId);
+	});
 
 	return (
 		<div className="space-y-4">
@@ -356,43 +356,41 @@ export function AdminVenuesPage() {
 															</div>
 
 															{/* Inline Assign Input */}
-															{assignable.length > 0 ? (
-																<div className="flex flex-col sm:flex-row gap-2 sm:items-end">
-																	<div className="w-full sm:w-64">
-																		<Select
-																			label="Assign New Handler"
-																			selectedKey={handlerFormState[venue.venueId] || ""}
-																			onSelectionChange={(key) =>
-																				setHandlerFormState((prev) => ({
-																					...prev,
-																					[venue.venueId]: key as string,
-																				}))
-																			}
-																			placeholder="Choose a user..."
-																			options={assignable.map((u) => ({
+															<div className="flex flex-col sm:flex-row gap-2 sm:items-end">
+																<div className="w-full sm:w-72">
+																	<Select
+																		label="Assign New Handler"
+																		isDisabled={assignable.length === 0}
+																		selectedKey={handlerFormState[venue.venueId] || ""}
+																		onSelectionChange={(key) =>
+																			setHandlerFormState((prev) => ({
+																				...prev,
+																				[venue.venueId]: key as string,
+																			}))
+																		}
+																		placeholder={assignable.length > 0 ? "Choose a user to assign..." : "No available users to select"}
+																		options={assignable.map((u) => {
+																			const rLabels = extractRoleValues(u.roles || (u as any).role).map(formatRoleLabel).join(", ");
+																			return {
 																				id: String(u.userId),
-																				label: `${u.name} (${hasRole(extractRoleValues(u.roles), "STAFF_IN_CHARGE") ? "Staff" : formatRoleLabel(extractRoleValues(u.roles)[0] || "FACULTY_IN_CHARGE")})`,
-																			}))}
-																		/>
-																	</div>
-																	<Button
-																		variant="primary"
-																		onPress={() => handleAddHandlerInline(venue.venueId)}
-																		isDisabled={!handlerFormState[venue.venueId] || isHandlerAction}
-																		className="h-[38px] px-4 text-xs w-full sm:w-auto"
-																	>
-																		{isHandlerAction ? (
-																			<Loader2 className="w-3.5 h-3.5 animate-spin" />
-																		) : (
-																			"Assign"
-																		)}
-																	</Button>
+																				label: `${u.name}${rLabels ? ` (${rLabels})` : ""}`,
+																			};
+																		})}
+																	/>
 																</div>
-															) : (
-																<div className="text-xs text-gray-500 italic bg-gray-100 px-3 py-2 rounded-lg border border-gray-200">
-																	All available staff & faculty have been assigned.
-																</div>
-															)}
+																<Button
+																	variant="primary"
+																	onPress={() => handleAddHandlerInline(venue.venueId)}
+																	isDisabled={!handlerFormState[venue.venueId] || isHandlerAction || assignable.length === 0}
+																	className="h-[38px] px-4 text-xs w-full sm:w-auto"
+																>
+																	{isHandlerAction ? (
+																		<Loader2 className="w-3.5 h-3.5 animate-spin" />
+																	) : (
+																		"Assign"
+																	)}
+																</Button>
+															</div>
 														</div>
 
 														<div>

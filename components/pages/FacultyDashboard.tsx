@@ -78,7 +78,7 @@ export function FacultyDashboard() {
         <p className="text-sm text-gray-500">Review and manage pending academic and administrative permission requests</p>
       </div>
 
-      <div className="flex gap-4 flex-wrap">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
         <StatCard title="Pending Review" value={pendingRequests.length.toString()} />
         <StatCard title="Approved" value={bookings.filter((b: any) => b.status === 'APPROVED').length.toString()} />
         <StatCard title="Rejected" value={bookings.filter((b: any) => b.status === 'REJECTED').length.toString()} variant="danger" />
@@ -235,6 +235,8 @@ type ApiBooking = {
   eventStart: string;
   eventEnd: string;
   status: BookingStatus;
+  remarks?: string;
+  description?: string;
   initialHandlerId?: number | null;
   actionToken?: string | null;
   actionTokenExpiry?: string | null;
@@ -294,10 +296,11 @@ function toBooking(apiBooking: ApiBooking): Booking {
     id: String(apiBooking.bookingId),
     title: apiBooking.eventName,
     venue: apiBooking.venue?.name || `Venue #${apiBooking.bookingId}`,
-    startDate: new Date(apiBooking.eventStart).toLocaleString(),
-    endDate: apiBooking.eventEnd ? new Date(apiBooking.eventEnd).toLocaleString() : undefined,
+    startDate: apiBooking.eventStart,
+    endDate: apiBooking.eventEnd,
     bookingDate: apiBooking.createdAt ? new Date(apiBooking.createdAt).toLocaleDateString() : undefined,
     status: apiBooking.status,
     club: apiBooking.club?.clubName,
+    subject: apiBooking.remarks || apiBooking.description || 'No additional remarks provided.',
   };
 }

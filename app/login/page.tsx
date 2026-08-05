@@ -26,7 +26,7 @@ export default function LoginPage() {
 
     setTimeout(() => {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
-      window.location.href = `${backendUrl}/api/auth/login?devRole=FACULTY_COORDINATOR`;
+      window.location.href = `${backendUrl}/api/auth/login`;
     }, 800);
   };
 
@@ -40,7 +40,7 @@ export default function LoginPage() {
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center px-4 py-16 z-10">
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          
+
           {/* Left Column: Branding and Feature List */}
           <div className="lg:col-span-7 space-y-8 text-left pr-0 lg:pr-8">
             <div className="space-y-4">
@@ -93,13 +93,35 @@ export default function LoginPage() {
                   <p className="text-sm text-text-muted mt-1">Please sign in to access your portal</p>
                 </div>
 
-                {/* Error message display */}
+                {/* Error message display with specific error reasons */}
                 {errorMessage && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-3.5 flex gap-2.5 text-left text-xs font-medium items-start animate-fade-in">
-                    <AlertCircle className="w-4.5 h-4.5 text-red-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-bold">Sign-in Failed</p>
-                      <p className="mt-0.5 text-red-600/90 leading-relaxed">{errorMessage}</p>
+                  <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 flex gap-3 text-left text-xs font-medium items-start animate-fade-in shadow-sm">
+                    <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                    <div className="space-y-1.5 flex-1">
+                      <p className="font-bold text-sm text-red-800">
+                        {errorMessage.toLowerCase().includes('nitc')
+                          ? 'NITC Email Required'
+                          : errorMessage.toLowerCase().includes('not present') || errorMessage.toLowerCase().includes('registered') || errorMessage.toLowerCase().includes('database')
+                            ? 'Account Not Present in Database'
+                            : errorMessage.toLowerCase().includes('deactivated')
+                              ? 'Account Deactivated'
+                              : 'Sign-in Failed'}
+                      </p>
+                      <p className="text-red-700/90 leading-relaxed">
+                        {errorMessage.toLowerCase().includes('nitc') && !errorMessage.toLowerCase().includes('database')
+                          ? 'This email is not from NITC. Please sign in using your official @nitc.ac.in email address.'
+                          : errorMessage}
+                      </p>
+                      {(errorMessage.toLowerCase().includes('not present') || errorMessage.toLowerCase().includes('registered') || errorMessage.toLowerCase().includes('database') || errorMessage.toLowerCase().includes('admin')) && (
+                        <div className="pt-2">
+                          <a
+                            href="mailto:admin@nitc.ac.in?subject=NITC%20Venue%20Portal%20Registration%20Request&body=Hello%20Admin,%0A%0AMy%20email%20account%20is%20not%20present%20in%20the%20database.%20Could%20you%20please%20add%20my%20account%20to%20the%20portal?%0A%0AThank%20you!"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition-colors shadow-xs"
+                          >
+                            Inform Admin via Email
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -135,11 +157,11 @@ export default function LoginPage() {
                           {loadingStep === 3 && 'Access granted! Loading portal...'}
                         </p>
                         <div className="w-full bg-card-header/30 h-1.5 rounded-full overflow-hidden">
-                          <div 
-                            className="bg-primary h-full transition-all duration-500 ease-out" 
-                            style={{ 
-                              width: loadingStep === 1 ? '33%' : loadingStep === 2 ? '66%' : '100%' 
-                            }} 
+                          <div
+                            className="bg-primary h-full transition-all duration-500 ease-out"
+                            style={{
+                              width: loadingStep === 1 ? '33%' : loadingStep === 2 ? '66%' : '100%'
+                            }}
                           />
                         </div>
                       </div>
