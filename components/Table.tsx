@@ -77,17 +77,17 @@ type StatusBadgeProps = {
 
 export function StatusBadge({ status }: StatusBadgeProps) {
   const colors: Record<StatusBadgeProps['status'], string> = {
-    available: 'bg-green-50 text-green-700 border-green-200',
-    unavailable: 'bg-red-50 text-red-700 border-red-200',
-    forwarded: 'bg-blue-50 text-blue-700 border-blue-200',
-    APPROVED: 'bg-green-50 text-green-700 border-green-200',
-    PENDING_STAFF: 'bg-amber-50 text-amber-700 border-amber-200',
-    PENDING_FACULTY: 'bg-amber-50 text-amber-700 border-amber-200',
-    PENDING_COORDINATOR: 'bg-amber-50 text-amber-700 border-amber-200',
-    PENDING_HOD: 'bg-amber-50 text-amber-700 border-amber-200',
-    REJECTED: 'bg-red-50 text-red-700 border-red-200',
-    CANCELLED: 'bg-gray-50 text-gray-600 border-gray-200',
-    WITHDRAWN: 'bg-gray-50 text-gray-600 border-gray-200',
+    available: 'bg-emerald-50 text-emerald-700',
+    unavailable: 'bg-rose-50 text-rose-700',
+    forwarded: 'bg-sky-50 text-sky-700',
+    APPROVED: 'bg-[#D1FAE5] text-[#065F46]',
+    PENDING_STAFF: 'bg-[#FEF3C7] text-[#9A3412]',
+    PENDING_FACULTY: 'bg-[#FEF3C7] text-[#9A3412]',
+    PENDING_COORDINATOR: 'bg-[#FEF3C7] text-[#9A3412]',
+    PENDING_HOD: 'bg-[#FEF3C7] text-[#9A3412]',
+    REJECTED: 'bg-[#FEE2E2] text-[#991B1B]',
+    CANCELLED: 'bg-slate-100 text-slate-600',
+    WITHDRAWN: 'bg-slate-100 text-slate-600',
   };
 
   const labels: Record<StatusBadgeProps['status'], string> = {
@@ -105,7 +105,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
   };
 
   return (
-    <span className={cn('px-2.5 py-1 rounded-full text-xs font-semibold border inline-flex items-center', colors[status])}>
+    <span className={cn('px-3.5 py-1 rounded-full text-xs font-semibold inline-flex items-center tracking-tight', colors[status])}>
       {labels[status]}
     </span>
   );

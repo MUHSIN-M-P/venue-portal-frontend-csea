@@ -147,11 +147,11 @@ export function BookingReviewDashboardPage({ title, userId, role }: BookingRevie
           defaultTab="pending"
         >
           <TabPanelComponent id="pending">
-            <h3 className="text-base font-bold text-primary mb-4">PENDING REQUESTS</h3>
+            <h3 className="text-base font-extrabold text-[#701A1E] tracking-wider mb-5">PENDING REQUESTS</h3>
             {pendingRequests.length === 0 ? (
               <p className="text-text-muted italic text-sm">{isLoading ? 'Loading requests...' : 'No pending requests.'}</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {pendingRequests.map((booking) => (
                   <BookingCard
                     key={booking.id}
@@ -166,11 +166,11 @@ export function BookingReviewDashboardPage({ title, userId, role }: BookingRevie
           </TabPanelComponent>
 
           <TabPanelComponent id="approved">
-            <h3 className="text-base font-bold text-primary mb-4">APPROVAL HISTORY</h3>
+            <h3 className="text-base font-extrabold text-[#701A1E] tracking-wider mb-5">APPROVAL HISTORY</h3>
             {approvedRequests.length === 0 ? (
               <p className="text-text-muted italic text-sm">No approved requests.</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {approvedRequests.map((booking) => (
                   <BookingCard key={booking.id} booking={booking} />
                 ))}
@@ -179,11 +179,11 @@ export function BookingReviewDashboardPage({ title, userId, role }: BookingRevie
           </TabPanelComponent>
 
           <TabPanelComponent id="rejected">
-            <h3 className="text-base font-bold text-primary mb-4">REJECTED REQUESTS</h3>
+            <h3 className="text-base font-extrabold text-[#701A1E] tracking-wider mb-5">REJECTED REQUESTS</h3>
             {rejectedRequests.length === 0 ? (
               <p className="text-text-muted italic text-sm">No rejected requests.</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {rejectedRequests.map((booking) => (
                   <BookingCard key={booking.id} booking={booking} />
                 ))}

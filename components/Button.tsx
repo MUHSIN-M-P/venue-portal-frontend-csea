@@ -19,7 +19,7 @@ export function Button({
     <AriaButton
       className={({ isPressed, isHovered, isFocusVisible }) =>
         cn(
-          'rounded-full font-semibold transition-all',
+          'inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all cursor-pointer',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           

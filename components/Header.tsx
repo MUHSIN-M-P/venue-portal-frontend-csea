@@ -94,14 +94,14 @@ export function Header({ onMenuPress }: HeaderProps) {
                 <button
                   type="button"
                   onClick={() => setIsRoleDropdownOpen((prev) => !prev)}
-                  className="flex items-center gap-2 bg-accent/40 hover:bg-accent/60 transition-all px-3 py-1.5 rounded-lg border border-white/20 text-xs font-bold text-white shadow-xs cursor-pointer"
+                  className="flex items-center gap-2 bg-white/20 hover:bg-white/30 transition-all px-4 py-1.5 rounded-full border border-white/30 text-xs font-bold text-white shadow-xs cursor-pointer active:scale-95"
                 >
                   <Shield className="w-3.5 h-3.5 text-white shrink-0" />
                   <span>{activeRole ? formatRoleLabel(activeRole) : 'Switch Role'}</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-white shrink-0" />
+                  <ChevronDown className={`w-3.5 h-3.5 text-white shrink-0 transition-transform duration-200 ${isRoleDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
               ) : (
-                <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-lg border border-white/15 text-xs font-bold text-white/90">
+                <div className="flex items-center gap-1.5 bg-white/15 px-4 py-1.5 rounded-full border border-white/20 text-xs font-bold text-white/90">
                   <Shield className="w-3.5 h-3.5 text-white/70" />
                   <span>{formatRoleLabel(userRoles[0])}</span>
                 </div>
@@ -109,26 +109,30 @@ export function Header({ onMenuPress }: HeaderProps) {
 
               {/* Role Selector Popup Dropdown */}
               {isRoleDropdownOpen && userRoles.length > 1 && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-50 text-gray-800 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="px-3 py-1.5 border-b border-gray-100 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                <div className="absolute right-0 top-full mt-2.5 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50 text-slate-800 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="px-4 py-3 border-b border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                     Switch Role View
                   </div>
-                  {userRoles.map((r) => {
-                    const isSelected = activeRole === r;
-                    return (
-                      <button
-                        key={r}
-                        type="button"
-                        onClick={() => handleRoleSelect(r)}
-                        className={`w-full text-left px-3 py-2 text-xs font-semibold flex items-center justify-between hover:bg-gray-50 transition-colors ${
-                          isSelected ? 'text-primary bg-card/20' : 'text-gray-700'
-                        }`}
-                      >
-                        <span>{formatRoleLabel(r)}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-primary" />}
-                      </button>
-                    );
-                  })}
+                  <div className="py-1">
+                    {userRoles.map((r) => {
+                      const isSelected = activeRole === r;
+                      return (
+                        <button
+                          key={r}
+                          type="button"
+                          onClick={() => handleRoleSelect(r)}
+                          className={`w-full text-left px-4 py-2.5 text-xs sm:text-sm font-semibold flex items-center justify-between transition-colors cursor-pointer ${
+                            isSelected
+                              ? 'text-[#701D2E] bg-[#FAF0EE] font-bold'
+                              : 'text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span>{formatRoleLabel(r)}</span>
+                          {isSelected && <Check className="w-4 h-4 text-[#701D2E]" />}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
