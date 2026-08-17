@@ -116,7 +116,7 @@ export function ClubDashboardPage() {
 					eventName,
 					eventStart: startISO,
 					eventEnd: endISO,
-					remarks: description || "No description provided",
+					description: description || "No description provided",
 				},
 			});
 
