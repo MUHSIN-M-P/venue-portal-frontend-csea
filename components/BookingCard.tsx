@@ -15,6 +15,14 @@ type BookingCardProps = {
   onViewDetails?: () => void;
 };
 
+function formatDateDMY(date: Date) {
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date);
+}
+
 export function formatBookingDetails(startDateStr: string, endDateStr?: string) {
   const start = new Date(startDateStr);
   const isStartValid = !isNaN(start.getTime());
@@ -31,13 +39,9 @@ export function formatBookingDetails(startDateStr: string, endDateStr?: string) 
   const end = endDateStr ? new Date(endDateStr) : null;
   const isEndValid = end ? !isNaN(end.getTime()) : false;
 
-  const dateStr = start.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  const dateStr = formatDateDMY(start);
 
-  const numericDateStr = start.toLocaleDateString('en-US');
+  const numericDateStr = formatDateDMY(start);
   const fullStartTimeStr = start.toLocaleTimeString('en-US');
 
   const startTimeStr = start.toLocaleTimeString('en-US', {
@@ -62,12 +66,9 @@ export function formatBookingDetails(startDateStr: string, endDateStr?: string) 
       timeRange = `${startTimeStr} – ${endTimeStr}`;
       fullDateTimeStr = `${numericDateStr}, ${startTimeStr} – ${endTimeStr}`;
     } else {
-      const endDateFormatted = end.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      });
+      const endDateFormatted = formatDateDMY(end);
       timeRange = `${dateStr} ${startTimeStr} – ${endDateFormatted} ${endTimeStr}`;
-      fullDateTimeStr = `${numericDateStr} ${startTimeStr} – ${end.toLocaleDateString('en-US')} ${endTimeStr}`;
+      fullDateTimeStr = `${numericDateStr} ${startTimeStr} – ${formatDateDMY(end)} ${endTimeStr}`;
     }
 
     const diffMs = end.getTime() - start.getTime();
@@ -238,7 +239,10 @@ export function BookingCard({ booking, showActions, onAccept, onReject, onViewDe
 
           {booking.bookingDate && (
             <p className="text-[11px] text-text-muted text-right">
-              Requested on: {booking.bookingDate}
+              Requested on: {(() => {
+                const parsed = new Date(booking.bookingDate);
+                return !isNaN(parsed.getTime()) ? formatDateDMY(parsed) : booking.bookingDate;
+              })()}
             </p>
           )}
 
