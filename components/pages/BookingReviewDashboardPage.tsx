@@ -24,11 +24,16 @@ type ApiBooking = {
   eventStart: string;
   eventEnd: string;
   status: BookingStatus;
+  pendingOnMe?: boolean;
   createdAt?: string;
   remarks?: string;
   description?: string;
   club?: { clubName?: string };
   venue?: { name?: string };
+};
+
+type ReviewBooking = Booking & {
+  pendingOnMe: boolean;
 };
 
 type BookingsResponse = {
@@ -50,7 +55,7 @@ type BookingReviewDashboardPageProps = {
   role: string;
 };
 
-function toBooking(apiBooking: ApiBooking): Booking {
+function toBooking(apiBooking: ApiBooking): ReviewBooking {
   return {
     id: String(apiBooking.bookingId),
     title: apiBooking.eventName,
@@ -61,6 +66,7 @@ function toBooking(apiBooking: ApiBooking): Booking {
     status: apiBooking.status,
     club: apiBooking.club?.clubName,
     subject: apiBooking.remarks || apiBooking.description || 'No additional remarks provided.',
+    pendingOnMe: Boolean(apiBooking.pendingOnMe),
   };
 }
 
@@ -68,14 +74,12 @@ export function BookingReviewDashboardPage({ title, userId, role }: BookingRevie
   const { sendRequest: fetchBookings, isLoading } = useFetch<BookingsResponse>();
   const { sendRequest: approveBooking } = useFetch<BookingActionResponse>();
   const { sendRequest: rejectBooking } = useFetch<BookingActionResponse>();
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<ReviewBooking[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [userRoles] = useState<string[]>(() => getStoredRoles());
 
   useEffect(() => {
     // GET /api/bookings — filtering is done server-side via the bearer token.
-    setUserRoles(getStoredRoles());
-
     fetchBookings(`/bookings?role=${role}`, { method: 'GET' })
       .then((res) => {
         if (res) {
@@ -116,6 +120,8 @@ export function BookingReviewDashboardPage({ title, userId, role }: BookingRevie
   );
 
   const pendingRequests = bookings.filter((booking) => pendingStatuses.has(booking.status));
+  const pendingOnMeRequests = pendingRequests.filter((booking) => booking.pendingOnMe);
+  const pendingElsewhereRequests = pendingRequests.filter((booking) => !booking.pendingOnMe);
   const approvedRequests = bookings.filter((booking) => booking.status === 'APPROVED');
   const rejectedRequests = bookings.filter((booking) => booking.status === 'REJECTED');
 
@@ -151,16 +157,38 @@ export function BookingReviewDashboardPage({ title, userId, role }: BookingRevie
             {pendingRequests.length === 0 ? (
               <p className="text-text-muted italic text-sm">{isLoading ? 'Loading requests...' : 'No pending requests.'}</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {pendingRequests.map((booking) => (
-                  <BookingCard
-                    key={booking.id}
-                    booking={booking}
-                    showActions
-                    onAccept={() => booking.id && handleAction(booking.id, 'approved')}
-                    onReject={() => booking.id && handleAction(booking.id, 'rejected')}
-                  />
-                ))}
+              <div className="space-y-6">
+                {pendingOnMeRequests.length > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[#701A1E]">Awaiting your action</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                      {pendingOnMeRequests.map((booking) => (
+                        <BookingCard
+                          key={booking.id}
+                          booking={booking}
+                          showActions
+                          onAccept={() => booking.id && handleAction(booking.id, 'approved')}
+                          onReject={() => booking.id && handleAction(booking.id, 'rejected')}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {pendingOnMeRequests.length > 0 && pendingElsewhereRequests.length > 0 && (
+                  <div className="border-t-2 border-dotted border-[#7A1F32]/30" />
+                )}
+
+                {pendingElsewhereRequests.length > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Pending at other stage</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                      {pendingElsewhereRequests.map((booking) => (
+                        <BookingCard key={booking.id} booking={booking} />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </TabPanelComponent>
