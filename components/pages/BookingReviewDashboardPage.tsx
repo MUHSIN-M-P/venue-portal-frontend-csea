@@ -18,6 +18,14 @@ type BookingStatus =
   | 'CANCELLED'
   | 'WITHDRAWN';
 
+type BookingLog = {
+  name: string;
+  email: string;
+  role: string;
+  action: string;
+  timestamp: string;
+}
+
 type ApiBooking = {
   bookingId: number;
   eventName: string;
@@ -28,12 +36,14 @@ type ApiBooking = {
   createdAt?: string;
   remarks?: string;
   description?: string;
+  logs?: BookingLog[];
   club?: { clubName?: string };
   venue?: { name?: string };
 };
 
 type ReviewBooking = Booking & {
   pendingOnMe: boolean;
+  logs: BookingLog[];
 };
 
 type BookingsResponse = {
@@ -65,7 +75,8 @@ function toBooking(apiBooking: ApiBooking): ReviewBooking {
     bookingDate: apiBooking.createdAt ? new Date(apiBooking.createdAt).toLocaleDateString() : '',
     status: apiBooking.status,
     club: apiBooking.club?.clubName,
-    subject: apiBooking.remarks || apiBooking.description || 'No additional remarks provided.',
+    subject: apiBooking.description || 'No description provided.',
+    logs: apiBooking.logs || [],
     pendingOnMe: Boolean(apiBooking.pendingOnMe),
   };
 }
@@ -98,11 +109,27 @@ export function BookingReviewDashboardPage({ title, userId, role }: BookingRevie
         ? await approveBooking(endpoint, { method: 'POST', body })
         : await rejectBooking(endpoint, { method: 'POST', body });
 
+      // Modify the booking and its log
       setBookings((prev) =>
-        prev.map((booking) =>
-          booking.id === id && res && res.data ? toBooking(res.data) : booking
-        )
+        prev.map((booking) => {
+          if (booking.id === id) {
+            const newLog: BookingLog = {
+              name: localStorage.getItem('perms_user_name') || 'User',
+              email: localStorage.getItem('perms_user_email') || '',
+              role: role,
+              action: newStatus === 'approved' ? 'APPROVED' : 'REJECTED',
+              timestamp: new Date().toISOString(),
+            };
+            
+            booking.status = res?.data?.status || booking.status;
+            booking.pendingOnMe = false; // After action, it's no longer pending on the user
+
+            return { ...booking, logs: [...booking.logs, newLog] };
+          }
+          return booking;
+        })
       );
+
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to update booking.');

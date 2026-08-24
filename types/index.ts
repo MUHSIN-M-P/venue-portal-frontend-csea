@@ -81,6 +81,14 @@ export type Person = {
   status: 'available' | 'unavailable';
 };
 
+export type BookingLog = {
+  name: string;
+  email: string;
+  role: string;
+  action: string;
+  timestamp: string;
+};
+
 export type Booking = {
   id?: string;
   title: string;
@@ -91,6 +99,7 @@ export type Booking = {
   bookingDate?: string;
   club?: string;
   subject?: string;
+  logs?: BookingLog[];
 };
 
 
