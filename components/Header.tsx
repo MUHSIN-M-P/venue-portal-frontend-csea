@@ -1,7 +1,7 @@
 'use client';
 
 import { Menu, LogOut, ChevronDown, Shield, Check } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import { getStoredRoles, formatRoleLabel, PortalRole, getPrimaryRouteForRoles } from '@/lib/utils';
 
@@ -11,11 +11,21 @@ type HeaderProps = {
 
 export function Header({ onMenuPress }: HeaderProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const [userRoles, setUserRoles] = useState<PortalRole[]>([]);
   const [activeRole, setActiveRole] = useState<PortalRole | null>(null);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const routeRoles: Record<string, PortalRole> = {
+    '/admin': 'ADMIN',
+    '/club': 'CLUB',
+    '/faculty_coordinator': 'FACULTY_COORDINATOR',
+    '/staff_in_charge': 'STAFF_IN_CHARGE',
+    '/faculty_in_charge': 'FACULTY_IN_CHARGE',
+    '/hod': 'HOD',
+  };
 
   useEffect(() => {
     const loggedIn = localStorage.getItem('perms_logged_in');
@@ -36,6 +46,14 @@ export function Header({ onMenuPress }: HeaderProps) {
       }, 0);
     }
   }, []);
+
+  useEffect(() => {
+    const routeRole = routeRoles[pathname];
+    if (!routeRole || !userRoles.includes(routeRole)) return;
+
+    setActiveRole(routeRole);
+    localStorage.setItem('perms_active_role', routeRole);
+  }, [pathname, userRoles]);
 
   // Close dropdown on click outside
   useEffect(() => {
