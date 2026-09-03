@@ -78,8 +78,8 @@ export function FacultyDashboard() {
         <p className="text-sm text-gray-500">Review and manage pending academic and administrative permission requests</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
-        <StatCard title="Pending Review" value={pendingRequests.length.toString()} />
+      <div className="grid grid-cols-3 gap-3 sm:gap-4 w-full">
+        <StatCard title="Pending Review" shortTitle="Pending" value={pendingRequests.length.toString()} />
         <StatCard title="Approved" value={bookings.filter((b: any) => b.status === 'APPROVED').length.toString()} />
         <StatCard title="Rejected" value={bookings.filter((b: any) => b.status === 'REJECTED').length.toString()} variant="danger" />
       </div>

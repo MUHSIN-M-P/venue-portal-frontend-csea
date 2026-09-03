@@ -165,9 +165,9 @@ export function BookingReviewDashboardPage({ title, userId, role }: BookingRevie
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-        <StatCard title="Pending requests" value={isLoading ? '...' : String(pendingRequests.length)} variant="danger" />
-        <StatCard title="Approved this month" value={isLoading ? '...' : String(approvedRequests.length)} />
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full">
+        <StatCard title="Pending requests" shortTitle="Pending" value={isLoading ? '...' : String(pendingRequests.length)} variant="danger" />
+        <StatCard title="Approved this month" shortTitle="Approved" value={isLoading ? '...' : String(approvedRequests.length)} />
       </div>
 
       <Card className="p-6">

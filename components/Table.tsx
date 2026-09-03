@@ -13,7 +13,7 @@ type TableProps = {
 
 export function Table({ headers, children, className, label = 'Data Table' }: TableProps) {
   return (
-    <div className={cn('bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden', className)}>
+    <div className={cn('bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden w-full', className)}>
       <div className="overflow-x-auto">
         <AriaTable aria-label={label} className="w-full border-collapse">
           <TableHeader className="bg-card-header/30 border-b border-gray-150">

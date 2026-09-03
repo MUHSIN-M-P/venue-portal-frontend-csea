@@ -118,7 +118,7 @@ export function AdminDashboard({
 						</div>
 
 						{/* ── Stat cards ─────────────────────────────────────────────── */}
-						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+						<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
 							<StatCard title="Total Users" value={statVal(totalUsers)} />
 							<StatCard title="Active Faculty" value={statVal(activeFaculty)} />
 							<StatCard title="Active Staff" value={statVal(activeStaff)} />
@@ -329,5 +329,5 @@ export function AdminDashboard({
 		}
 	};
 
-	return <div className="p-4 lg:p-6 space-y-6">{renderContent()}</div>;
+	return <div className="w-full space-y-4 sm:space-y-6">{renderContent()}</div>;
 }

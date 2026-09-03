@@ -228,11 +228,12 @@ export function ClubDashboardPage() {
 				</div>
 			</div>
 
-			<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
-				<StatCard title="Pending requests" value={String(pendingCount)} />
-				<StatCard title="Approved requests" value={String(approvedCount)} />
+			<div className="grid grid-cols-3 gap-3 sm:gap-4 w-full">
+				<StatCard title="Pending requests" shortTitle="Pending" value={String(pendingCount)} />
+				<StatCard title="Approved requests" shortTitle="Approved" value={String(approvedCount)} />
 				<StatCard
 					title="Rejected requests"
+					shortTitle="Rejected"
 					value={String(rejectedCount)}
 					variant="danger"
 				/>

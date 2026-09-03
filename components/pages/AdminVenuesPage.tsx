@@ -199,7 +199,7 @@ export function AdminVenuesPage() {
 	});
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-4 w-full">
 			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 				<div>
 					<h1 className="text-xl font-bold text-gray-800">Venue Management</h1>
@@ -212,7 +212,7 @@ export function AdminVenuesPage() {
 				</Button>
 			</div>
 
-			<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+			<div className="grid grid-cols-3 gap-3 sm:gap-4 w-full">
 				<StatCard title="Total Venues" value={stats.total.toString()} />
 				<StatCard title="Available" value={stats.available.toString()} />
 				<StatCard
@@ -222,24 +222,23 @@ export function AdminVenuesPage() {
 				/>
 			</div>
 
-			<div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-				{isFetching ? (
-					<div className="flex justify-center py-12">
-						<Loader2 className="w-10 h-10 animate-spin text-accent" />
-					</div>
-				) : fetchError ? (
-					<div className="p-6 text-center text-red-600 flex flex-col items-center gap-2">
-						<AlertCircle className="w-10 h-10" />
-						<p>{fetchError}</p>
-						<Button
-							variant="outline"
-							size="sm"
-							onPress={() => fetchVenues("/api/admin/venues")}
-						>
-							Retry
-						</Button>
-					</div>
-				) : (
+			{isFetching ? (
+				<div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex justify-center py-12 w-full">
+					<Loader2 className="w-10 h-10 animate-spin text-accent" />
+				</div>
+			) : fetchError ? (
+				<div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-6 text-center text-red-600 flex flex-col items-center gap-2 w-full">
+					<AlertCircle className="w-10 h-10" />
+					<p>{fetchError}</p>
+					<Button
+						variant="outline"
+						size="sm"
+						onPress={() => fetchVenues("/api/admin/venues")}
+					>
+						Retry
+					</Button>
+				</div>
+			) : (
 					<Table
 						headers={[
 							"", // Chevron column
@@ -449,7 +448,6 @@ export function AdminVenuesPage() {
 						)}
 					</Table>
 				)}
-			</div>
 
 			{/* Create/Edit Venue Details Modal */}
 			<Modal

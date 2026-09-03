@@ -16,8 +16,8 @@
   --color-danger: #e8999c;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --radius-lg: 1.5rem;
-  --radius-xl: 2rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 }
 
 @utility grid-cols-24 {

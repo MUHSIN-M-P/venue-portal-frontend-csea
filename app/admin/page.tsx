@@ -55,7 +55,7 @@ export default function AdminPage() {
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />
-        <main className="grow overflow-y-auto p-4 lg:p-6 transition-all duration-300">
+        <main className="grow w-full min-w-0 overflow-y-auto p-3 sm:p-4 lg:p-6 transition-all duration-300">
           <AdminDashboard activeSection={adminSection} />
         </main>
       </div>

@@ -186,6 +186,24 @@ export function AvailabilityGrid({
     return `${DAY_ABBREVS[d.getDay()]} (${dateStr})`;
   };
 
+  const getMobileDayHeader = (index: number) => {
+    const d = getNext7Days()[index];
+    const dateStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+    return {
+      dayAbbrev: DAY_ABBREVS[d.getDay()],
+      dateStr,
+    };
+  };
+
+  const formatHour12 = (h: number | string) => {
+    const num = typeof h === 'string' ? parseInt(h.split(':')[0], 10) : h;
+    const normalizedH = ((num % 24) + 24) % 24;
+    const period = normalizedH >= 12 ? 'PM' : 'AM';
+    const h12 = normalizedH % 12 === 0 ? 12 : normalizedH % 12;
+    const pad = String(h12).padStart(2, '0');
+    return `${pad}:00 ${period}`;
+  };
+
   const updateRange = (
     start: { dayIndex: number; hourIndex: number },
     end: { dayIndex: number; hourIndex: number } | null
@@ -207,16 +225,15 @@ export function AvailabilityGrid({
       return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
     };
 
-    const padHour = (h: number) => String(h % 24).padStart(2, '0') + ':00';
     const fullNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const startDayName = fullNames[startDate.getDay()];
     const endDayName = fullNames[endObj.getDay()];
 
     let rangeText = '';
     if (!end || start.dayIndex === end.dayIndex) {
-      rangeText = `${startDayName} (${formatDate(startDate)}) from ${padHour(startHour)} to ${padHour(endHour)}`;
+      rangeText = `${startDayName} (${formatDate(startDate)}) from ${formatHour12(startHour)} to ${formatHour12(endHour)}`;
     } else {
-      rangeText = `${startDayName} (${formatDate(startDate)}) ${padHour(startHour)} to ${endDayName} (${formatDate(endObj)}) ${padHour(endHour)}`;
+      rangeText = `${startDayName} (${formatDate(startDate)}) ${formatHour12(startHour)} to ${endDayName} (${formatDate(endObj)}) ${formatHour12(endHour)}`;
     }
 
     onSelectRange(startObj.toISOString(), endObj.toISOString(), rangeText);
@@ -276,20 +293,94 @@ export function AvailabilityGrid({
   };
 
   return (
-    <div className="bg-[#fdf6ee] rounded-3xl p-6 shadow-sm border border-card-header/40 mt-4">
-      <h3 className="text-base font-semibold text-text-muted mb-2">Venue Availability Grid — {selectedVenue}</h3>
+    <div className="bg-[#fdf6ee] rounded-3xl p-4 sm:p-6 shadow-sm border border-card-header/40 mt-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
+        <h3 className="text-base font-semibold text-text-muted">Venue Availability Grid — {selectedVenue}</h3>
+      </div>
       <p className="text-xs text-gray-500 mb-4">Click an available slot to set the start time, and click a later slot (even across multiple days) to set the end time.</p>
       
-      {/* Scrollable grid wrapper for mobile/tablet responsive layout */}
-      <div className="overflow-x-auto pb-4">
+      {/* Mobile Rotated Vertical View (block md:hidden) */}
+      <div className="block md:hidden">
+        {/* Days Header Row */}
+        <div className="flex items-center pb-2 border-b border-card-header/40 mb-2 sticky top-0 bg-[#fdf6ee] z-10 pt-1">
+          <div className="w-11 shrink-0 text-left text-[11px] font-bold text-text-muted">Time</div>
+          <div className="grow grid grid-cols-7 gap-1">
+            {DAYS.map((day, dayIndex) => {
+              const { dayAbbrev, dateStr } = getMobileDayHeader(dayIndex);
+              return (
+                <div key={day} className="text-center">
+                  <div className="text-xs font-bold text-text-muted">{dayAbbrev}</div>
+                  <div className="text-[10px] text-text-muted/80">{dateStr}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 24 Hours Rows */}
+        <div className="max-h-[480px] overflow-y-auto space-y-1.5 pr-1">
+          {HOURS.map((hour, hourIndex) => {
+            const hrNum = hour.slice(0, 2);
+            const minPart = hour.slice(2);
+            return (
+              <div key={hour} className="flex items-center">
+                <div className="w-11 shrink-0 text-left leading-none">
+                  <span className="text-xs font-bold text-text-muted">{hrNum}</span>
+                  <span className="text-[10px] font-semibold text-text-muted">{minPart}</span>
+                </div>
+                <div className="grow grid grid-cols-7 gap-1">
+                  {DAYS.map((day, dayIndex) => {
+                    const status = (dynamicVenueData[day] || Array(24).fill(1))[hourIndex];
+                    const flatCurrent = dayIndex * 24 + hourIndex;
+                    const flatStart = selectionStart ? selectionStart.dayIndex * 24 + selectionStart.hourIndex : -1;
+                    const flatEnd = selectionEnd ? selectionEnd.dayIndex * 24 + selectionEnd.hourIndex : -1;
+
+                    const isSelected = selectionStart !== null && (
+                      selectionEnd === null 
+                        ? flatCurrent === flatStart 
+                        : (flatCurrent >= flatStart && flatCurrent <= flatEnd)
+                    );
+                    
+                    const isSelectable = status === 1;
+                    
+                    let bgClass = getCellColor(status);
+                    if (isSelected) {
+                      bgClass = 'bg-primary text-white font-bold ring-1 ring-offset-1 ring-primary';
+                    }
+
+                    return (
+                      <button
+                        key={dayIndex}
+                        type="button"
+                        disabled={!isSelectable}
+                        onClick={() => onSelectCell(dayIndex, hourIndex)}
+                        className={`h-8 rounded-md border-0 transition-all ${bgClass} ${
+                          isSelectable 
+                            ? 'cursor-pointer active:scale-95' 
+                            : 'cursor-not-allowed opacity-60'
+                        }`}
+                        title={`${day} at ${formatHour12(hourIndex)} (${status === 1 ? 'Available - Click to select' : status === 2 ? 'Occupied' : status === 0 ? 'Off hours' : 'Your booking'})`}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Desktop Horizontal View (hidden md:block) */}
+      <div className="hidden md:block overflow-x-auto pb-4">
         <div className="min-w-[960px] px-1">
-          {/* Hours header row */}
+          {/* Hours header row - Left shifted hours, smaller zeros of minute, starting at box edge */}
           <div className="flex mb-3">
-            <div className="w-24 shrink-0" />
+            <div className="w-24 shrink-0 font-semibold text-xs text-text-muted pr-2">Day / Time</div>
             <div className="grow grid grid-cols-24 gap-1.5">
               {HOURS.map((hour) => (
-                <div key={hour} className="text-center text-xs font-semibold text-text-muted">
-                  {hour}
+                <div key={hour} className="text-left overflow-visible leading-none ">
+                  <span className="text-xs font-bold text-text-muted">{hour.slice(0, 2)}</span>
+                  <span className="text-[9px] font-semibold text-text-muted">{hour.slice(2)}</span>
                 </div>
               ))}
             </div>
@@ -302,7 +393,7 @@ export function AvailabilityGrid({
                 <div className="w-24 shrink-0 font-semibold text-xs text-text-muted pr-2">
                   {getDayLabel(day, dayIndex)}
                 </div>
-                <div className="grow grid grid-cols-24 gap-1.25">
+                <div className="grow grid grid-cols-24 gap-1.5">
                   {(dynamicVenueData[day] || Array(24).fill(1)).map((status, hourIndex) => {
                     const flatCurrent = dayIndex * 24 + hourIndex;
                     const flatStart = selectionStart ? selectionStart.dayIndex * 24 + selectionStart.hourIndex : -1;
@@ -332,7 +423,7 @@ export function AvailabilityGrid({
                             ? 'cursor-pointer hover:opacity-85 hover:scale-105' 
                             : 'cursor-not-allowed opacity-60'
                         }`}
-                        title={`${day} at ${HOURS[hourIndex]} (${status === 1 ? 'Available - Click to select' : status === 2 ? 'Occupied' : status === 0 ? 'Off hours' : 'Your booking'})`}
+                        title={`${day} at ${formatHour12(hourIndex)} (${status === 1 ? 'Available - Click to select' : status === 2 ? 'Occupied' : status === 0 ? 'Off hours' : 'Your booking'})`}
                       />
                     );
                   })}
@@ -344,28 +435,29 @@ export function AvailabilityGrid({
       </div>
 
       {/* Legend inside the card */}
-      <div className="flex flex-wrap gap-6 mt-6 pt-5 border-t border-card-header/40">
+      <div className="flex flex-wrap gap-4 sm:gap-6 mt-6 pt-5 border-t border-card-header/40">
         <div className="flex items-center gap-2">
           <div className={`w-5 h-5 rounded-md ${getCellColor(1)}`} />
-          <span className="text-sm font-semibold text-text-muted">available</span>
+          <span className="text-xs sm:text-sm font-semibold text-text-muted">available</span>
         </div>
         <div className="flex items-center gap-2">
           <div className={`w-5 h-5 rounded-md ${getCellColor(2)}`} />
-          <span className="text-sm font-semibold text-text-muted">occupied</span>
+          <span className="text-xs sm:text-sm font-semibold text-text-muted">occupied</span>
         </div>
         <div className="flex items-center gap-2">
           <div className={`w-5 h-5 rounded-md ${getCellColor(0)}`} />
-          <span className="text-sm font-semibold text-text-muted">off hours</span>
+          <span className="text-xs sm:text-sm font-semibold text-text-muted">off hours</span>
         </div>
         <div className="flex items-center gap-2">
           <div className={`w-5 h-5 rounded-md ${getCellColor(3)}`} />
-          <span className="text-sm font-semibold text-text-muted">your booking</span>
+          <span className="text-xs sm:text-sm font-semibold text-text-muted">your booking</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded-md bg-primary" />
-          <span className="text-sm font-semibold text-text-muted">your selection</span>
+          <span className="text-xs sm:text-sm font-semibold text-text-muted">your selection</span>
         </div>
       </div>
     </div>
   );
 }
+

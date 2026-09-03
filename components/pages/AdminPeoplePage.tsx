@@ -135,7 +135,7 @@ export function AdminPeoplePage() {
 	const adminCount = users.filter((u) => hasRole(extractRoleValues(u.roles), "ADMIN")).length;
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-4 w-full">
 			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 				<div>
 					<h1 className="text-xl font-bold text-gray-800">User Management</h1>
@@ -148,7 +148,7 @@ export function AdminPeoplePage() {
 				</Button>
 			</div>
 
-			<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+			<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
 				<StatCard title="Total Users" value={String(totalUsers)} />
 				<StatCard title="Clubs" value={String(clubCount)} />
 				<StatCard title="Faculty" value={String(facultyCount)} />
@@ -156,24 +156,23 @@ export function AdminPeoplePage() {
 				<StatCard title="Admins" value={String(adminCount)} />
 			</div>
 
-			<div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-				{isFetching ? (
-					<div className="flex justify-center py-12">
-						<Loader2 className="w-10 h-10 animate-spin text-accent" />
-					</div>
-				) : fetchError ? (
-					<div className="p-6 text-center text-red-600 flex flex-col items-center gap-2">
-						<AlertCircle className="w-10 h-10" />
-						<p>{fetchError}</p>
-						<Button
-							variant="outline"
-							size="sm"
-							onPress={() => fetchUsers("/api/admin/users")}
-						>
-							Retry
-						</Button>
-					</div>
-				) : (
+			{isFetching ? (
+				<div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex justify-center py-12 w-full">
+					<Loader2 className="w-10 h-10 animate-spin text-accent" />
+				</div>
+			) : fetchError ? (
+				<div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-6 text-center text-red-600 flex flex-col items-center gap-2 w-full">
+					<AlertCircle className="w-10 h-10" />
+					<p>{fetchError}</p>
+					<Button
+						variant="outline"
+						size="sm"
+						onPress={() => fetchUsers("/api/admin/users")}
+					>
+						Retry
+					</Button>
+				</div>
+			) : (
 					<Table headers={["Name", "Email", "Role", "Status", "Actions"]}>
 						{users.length === 0 ? (
 							<TableRow>
@@ -223,7 +222,6 @@ export function AdminPeoplePage() {
 						)}
 					</Table>
 				)}
-			</div>
 
 			<Modal
 				isOpen={isOpen}

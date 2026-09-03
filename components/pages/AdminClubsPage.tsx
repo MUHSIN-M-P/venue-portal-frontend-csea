@@ -160,7 +160,7 @@ export function AdminClubsPage() {
 	}));
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-4 w-full">
 			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 				<div>
 					<h1 className="text-xl font-bold text-gray-800">Club Registry</h1>
@@ -173,111 +173,109 @@ export function AdminClubsPage() {
 				</Button>
 			</div>
 
-			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+			<div className="grid grid-cols-2 gap-3 sm:gap-4 w-full">
 				<StatCard title="Total Clubs" value={stats.total.toString()} />
 				<StatCard title="Active Registry" value={stats.active.toString()} />
 			</div>
 
-			<div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-				{isFetching ? (
-					<div className="flex justify-center py-12">
-						<Loader2 className="w-10 h-10 animate-spin text-accent" />
-					</div>
-				) : fetchError ? (
-					<div className="p-6 text-center text-red-600 flex flex-col items-center gap-2">
-						<AlertCircle className="w-10 h-10" />
-						<p>{fetchError}</p>
-						<Button
-							variant="outline"
-							size="sm"
-							onPress={() => fetchClubs("/api/clubs")}
-						>
-							Retry
-						</Button>
-					</div>
-				) : (
-					<Table
-						headers={[
-							"Club Name",
-							"Secretary",
-							"Contact",
-							"Coordinator",
-							"Status",
-							"Actions",
-						]}
+			{isFetching ? (
+				<div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex justify-center py-12 w-full">
+					<Loader2 className="w-10 h-10 animate-spin text-accent" />
+				</div>
+			) : fetchError ? (
+				<div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-6 text-center text-red-600 flex flex-col items-center gap-2 w-full">
+					<AlertCircle className="w-10 h-10" />
+					<p>{fetchError}</p>
+					<Button
+						variant="outline"
+						size="sm"
+						onPress={() => fetchClubs("/api/clubs")}
 					>
-						{clubs.length === 0 ? (
-							<TableRow>
-								<TableCell className="text-center py-8 text-gray-500 italic">
-									No clubs found
+						Retry
+					</Button>
+				</div>
+			) : (
+				<Table
+					headers={[
+						"Club Name",
+						"Secretary",
+						"Contact",
+						"Coordinator",
+						"Status",
+						"Actions",
+					]}
+				>
+					{clubs.length === 0 ? (
+						<TableRow>
+							<TableCell className="text-center py-8 text-gray-500 italic">
+								No clubs found
+							</TableCell>
+							<TableCell>-</TableCell>
+							<TableCell>-</TableCell>
+							<TableCell>-</TableCell>
+							<TableCell>-</TableCell>
+							<TableCell>-</TableCell>
+						</TableRow>
+					) : (
+						clubs.map((club: any) => (
+							<TableRow key={club.clubId}>
+								<TableCell className="font-bold text-gray-800">
+									{club.clubName}
 								</TableCell>
-								<TableCell>-</TableCell>
-								<TableCell>-</TableCell>
-								<TableCell>-</TableCell>
-								<TableCell>-</TableCell>
-								<TableCell>-</TableCell>
-							</TableRow>
-						) : (
-							clubs.map((club: any) => (
-								<TableRow key={club.clubId}>
-									<TableCell className="font-bold text-gray-800">
-										{club.clubName}
-									</TableCell>
-									<TableCell className="text-sm">
-										<div className="font-medium text-gray-700">
-											{club.secretaryName}
-										</div>
-										<div className="text-xs text-gray-400">
-											{club.secretaryEmail}
-										</div>
-									</TableCell>
-									<TableCell className="text-sm text-gray-600">
-										{club.contactNumber}
-									</TableCell>
-									<TableCell className="text-sm">
-										<div className="font-medium text-gray-700">
-											{club.coordinator?.name || "Unknown"}
-										</div>
-										<div className="text-xs text-gray-400">
-											ID: {club.facultyCoordinatorId}
-										</div>
-									</TableCell>
-									<TableCell>
-										<span
-											className={cn(
-												"px-2 py-0.5 rounded-full text-[10px] font-bold border",
-												club.isActive !== false
-													? "bg-green-50 text-green-700 border-green-200"
-													: "bg-gray-50 text-gray-500 border-gray-200",
-											)}
+								<TableCell className="text-sm">
+									<div className="font-medium text-gray-700">
+										{club.secretaryName}
+									</div>
+									<div className="text-xs text-gray-400">
+										{club.secretaryEmail}
+									</div>
+								</TableCell>
+								<TableCell className="text-sm text-gray-600">
+									{club.contactNumber}
+								</TableCell>
+								<TableCell className="text-sm">
+									<div className="font-medium text-gray-700">
+										{club.coordinator?.name || "Unknown"}
+									</div>
+									<div className="text-xs text-gray-400">
+										ID: {club.facultyCoordinatorId}
+									</div>
+								</TableCell>
+								<TableCell>
+									<span
+										className={cn(
+											"px-2 py-0.5 rounded-full text-[10px] font-bold border",
+											club.isActive !== false
+												? "bg-green-50 text-green-700 border-green-200"
+												: "bg-red-50 text-red-700 border-red-200",
+										)}
+									>
+										{club.isActive !== false ? "Active" : "Inactive"}
+									</span>
+								</TableCell>
+								<TableCell>
+									<div className="flex gap-2">
+										<Button
+											variant="outline"
+											size="sm"
+											onPress={() => handleOpenEdit(club)}
 										>
-											{club.isActive !== false ? "ACTIVE" : "INACTIVE"}
-										</span>
-									</TableCell>
-									<TableCell>
-										<div className="flex gap-2">
-											<Button
-												size="sm"
-												variant="outline"
-												onPress={() => handleOpenEdit(club)}
-											>
-												<Edit className="w-3.5 h-3.5" />
-											</Button>
-											<Button
-												size="sm"
-												variant="danger"
-												onPress={() => handleDelete(club.clubId)}
-											>
-												<Trash2 className="w-3.5 h-3.5" />
-											</Button>
-										</div>
-									</TableCell>
-								</TableRow>
-							))
-						)}
-					</Table>
-				)}
-			</div>
+											<Edit className="w-3.5 h-3.5" />
+										</Button>
+										<Button
+											variant="danger"
+											size="sm"
+											onPress={() => handleDelete(club.clubId)}
+										>
+											<Trash2 className="w-3.5 h-3.5" />
+										</Button>
+									</div>
+								</TableCell>
+							</TableRow>
+						))
+					)}
+				</Table>
+			)}
 
 			<Modal
 				isOpen={isOpen}

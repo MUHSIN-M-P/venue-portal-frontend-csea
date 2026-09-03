@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShieldAlert, CheckCircle2, Calendar, Clock, Compass, HelpCircle, Loader2, AlertCircle } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, Calendar, Clock, Compass, HelpCircle, Loader2, AlertCircle, ChevronDown } from 'lucide-react';
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -31,74 +31,49 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background relative flex flex-col justify-between overflow-hidden">
+    <div className="min-h-screen bg-background relative flex flex-col justify-between overflow-x-hidden">
       {/* Decorative Background Blobs */}
       <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-primary/10 blur-[120px] pointer-events-none animate-pulse" style={{ animationDuration: '8s' }} />
       <div className="absolute bottom-[-10%] right-[-10%] w-[45vw] h-[45vw] rounded-full bg-secondary/15 blur-[100px] pointer-events-none animate-pulse" style={{ animationDuration: '12s' }} />
       <div className="absolute top-[30%] right-[15%] w-[25vw] h-[25vw] rounded-full bg-accent/10 blur-[90px] pointer-events-none" />
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 py-16 z-10">
-        <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 pt-32 pb-8 sm:pt-20 sm:pb-12 lg:py-16 z-10">
+        <div className="w-full max-w-5xl flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-8 items-center">
 
-          {/* Left Column: Branding and Feature List */}
-          <div className="lg:col-span-7 space-y-8 text-left pr-0 lg:pr-8">
-            <div className="space-y-4">
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider">
+          {/* Login Card Column (On mobile: right below top header; on desktop: right side lg:col-span-5 lg:order-2) */}
+          <div className="w-full max-w-md lg:max-w-none order-1 lg:order-2 lg:col-span-5 mx-auto flex flex-col items-center">
+            {/* Mobile-only Top Branding Header */}
+            <div className="block lg:hidden text-center space-y-2 mb-5 w-full">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-extrabold uppercase tracking-wider">
                 <Compass className="w-3.5 h-3.5" />
                 NITC CSEA Portal
               </span>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-primary tracking-tight leading-none">
+              <h1 className="text-4xl sm:text-5xl font-black text-primary tracking-tight leading-none">
                 PermsPortal
               </h1>
-              <p className="text-lg text-text-muted font-medium max-w-xl">
-                The centralized venue reservation and automated workflow approval system for the Computer Science & Engineering Association.
+              <p className="text-xs sm:text-sm text-text-muted font-medium max-w-sm mx-auto">
+                Centralized venue reservation & automated workflow approval
               </p>
             </div>
 
-            {/* Feature Highlights Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-5 rounded-2xl bg-surface/50 border border-card-header/50 shadow-sm hover:shadow-md transition-shadow">
-                <Calendar className="w-6 h-6 text-accent mb-3" />
-                <h3 className="font-bold text-text mb-1">Instant Availability</h3>
-                <p className="text-xs text-text-muted">Real-time scheduling grid with automated conflict detection.</p>
-              </div>
-              <div className="p-5 rounded-2xl bg-surface/50 border border-card-header/50 shadow-sm hover:shadow-md transition-shadow">
-                <Clock className="w-6 h-6 text-primary mb-3" />
-                <h3 className="font-bold text-text mb-1">Workflow Tracking</h3>
-                <p className="text-xs text-text-muted">Interactive timeline with live status updates and action logs.</p>
-              </div>
-              <div className="p-5 rounded-2xl bg-surface/50 border border-card-header/50 shadow-sm hover:shadow-md transition-shadow">
-                <CheckCircle2 className="w-6 h-6 text-success mb-3" />
-                <h3 className="font-bold text-text mb-1">Multi-stage Approvals</h3>
-                <p className="text-xs text-text-muted">Seamless routing from Coordinators to Staff, Faculty, and HOD.</p>
-              </div>
-              <div className="p-5 rounded-2xl bg-surface/50 border border-card-header/50 shadow-sm hover:shadow-md transition-shadow">
-                <HelpCircle className="w-6 h-6 text-secondary mb-3" />
-                <h3 className="font-bold text-text mb-1">Interactive Queries</h3>
-                <p className="text-xs text-text-muted">Clarify booking details directly through built-in query system.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Premium Login Card */}
-          <div className="lg:col-span-5">
-            <div className="bg-surface/85 backdrop-blur-md rounded-[2rem] border border-card-header/60 p-8 lg:p-10 shadow-xl relative overflow-hidden">
+            {/* Login Card */}
+            <div className="w-full bg-surface/90 backdrop-blur-md rounded-3xl sm:rounded-[2rem] border border-card-header/70 p-6 sm:p-8 lg:p-10 shadow-xl relative overflow-hidden">
               {/* Card top gradient line */}
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-primary via-accent to-secondary" />
 
-              <div className="text-center space-y-6">
+              <div className="text-center space-y-4 sm:space-y-5">
                 <div>
-                  <h2 className="text-2xl font-bold text-text">Welcome Back</h2>
-                  <p className="text-sm text-text-muted mt-1">Please sign in to access your portal</p>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-text">Welcome Back</h2>
+                  <p className="text-xs sm:text-sm text-text-muted mt-1">Please sign in to access your portal</p>
                 </div>
 
                 {/* Error message display with specific error reasons */}
                 {errorMessage && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 flex gap-3 text-left text-xs font-medium items-start animate-fade-in shadow-sm">
-                    <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                  <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-3.5 flex gap-2.5 text-left text-xs font-medium items-start animate-fade-in shadow-sm">
+                    <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                     <div className="space-y-1.5 flex-1">
-                      <p className="font-bold text-sm text-red-800">
+                      <p className="font-bold text-xs sm:text-sm text-red-800">
                         {errorMessage.toLowerCase().includes('nitc')
                           ? 'NITC Email Required'
                           : errorMessage.toLowerCase().includes('not present') || errorMessage.toLowerCase().includes('registered') || errorMessage.toLowerCase().includes('database')
@@ -107,13 +82,13 @@ export default function LoginPage() {
                               ? 'Account Deactivated'
                               : 'Sign-in Failed'}
                       </p>
-                      <p className="text-red-700/90 leading-relaxed">
+                      <p className="text-red-700/90 leading-relaxed text-[11px] sm:text-xs">
                         {errorMessage.toLowerCase().includes('nitc') && !errorMessage.toLowerCase().includes('database')
                           ? 'This email is not from NITC. Please sign in using your official @nitc.ac.in email address.'
                           : errorMessage}
                       </p>
                       {(errorMessage.toLowerCase().includes('not present') || errorMessage.toLowerCase().includes('registered') || errorMessage.toLowerCase().includes('database') || errorMessage.toLowerCase().includes('admin')) && (
-                        <div className="pt-2">
+                        <div className="pt-1.5">
                           <a
                             href="mailto:admin@nitc.ac.in?subject=NITC%20Venue%20Portal%20Registration%20Request&body=Hello%20Admin,%0A%0AMy%20email%20account%20is%20not%20present%20in%20the%20database.%20Could%20you%20please%20add%20my%20account%20to%20the%20portal?%0A%0AThank%20you!"
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition-colors shadow-xs"
@@ -127,15 +102,15 @@ export default function LoginPage() {
                 )}
 
                 {/* Google Login Button */}
-                <div className="py-4">
+                <div className="py-1.5 sm:py-2">
                   {!isLoading ? (
                     <button
                       id="google-login-btn"
                       onClick={handleGoogleLogin}
-                      className="w-full flex items-center justify-center gap-3 bg-white border border-card-header text-text font-bold py-3.5 px-6 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                      className="w-full flex items-center justify-center gap-3 bg-white border border-card-header text-text font-bold py-3.5 px-5 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] cursor-pointer"
                     >
                       {/* Google Multi-color SVG */}
-                      <svg className="w-5.5 h-5.5" viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                      <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
                         <g transform="matrix(1, 0, 0, 1, 0, 0)">
                           <path d="M21.35,11.1H12v2.7h5.38c-0.24,1.28 -0.96,2.37 -2.04,3.1v2.56h3.29c1.93,-1.78 3.04,-4.4 3.04,-7.49C21.67,11.97 21.56,11.51 21.35,11.1z" fill="#4285F4" />
                           <path d="M12,20.9c2.43,0 4.47,-0.8 5.96,-2.2l-3.29,-2.56c-0.9,0.6 -2.07,0.98 -3.37,0.98 -2.35,0 -4.33,-1.58 -5.04,-3.72H2.86v2.64C4.34,19.01 7.97,20.9 12,20.9z" fill="#34A853" />
@@ -143,7 +118,7 @@ export default function LoginPage() {
                           <path d="M12,5.78c1.32,0 2.5,0.45 3.44,1.35l2.58,-2.58C16.46,3.09 14.42,2.3 12,2.3 7.97,2.3 4.34,4.19 2.86,7.36l4.1,3.22C7.67,7.36 9.65,5.78 12,5.78z" fill="#EA4335" />
                         </g>
                       </svg>
-                      <span>Sign in with Google</span>
+                      <span className="text-sm sm:text-base">Sign in with Google</span>
                     </button>
                   ) : (
                     <div className="w-full bg-card/20 border border-card-header/50 py-5 px-6 rounded-2xl space-y-4 animate-fade-in">
@@ -170,18 +145,18 @@ export default function LoginPage() {
                 </div>
 
                 {/* Domain Restrictions Notice */}
-                <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 flex gap-3 text-left">
+                <div className="bg-primary/5 border border-primary/10 rounded-2xl p-3.5 flex gap-3 text-left">
                   <ShieldAlert className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                   <div className="space-y-1">
                     <h4 className="text-xs font-bold text-primary">NITC Accounts Only</h4>
-                    <p className="text-[11px] text-text-muted leading-normal">
+                    <p className="text-[11px] text-text-muted leading-relaxed">
                       Authorization is strictly restricted to students, faculty, and staff with official <strong>@nitc.ac.in</strong> email IDs.
                     </p>
                   </div>
                 </div>
 
                 {/* Secondary Actions / Help links */}
-                <div className="border-t border-card-header/40 pt-4 flex items-center justify-between text-xs text-text-muted">
+                <div className="border-t border-card-header/40 pt-3 flex items-center justify-between text-xs text-text-muted">
                   <a href="#help" className="hover:text-primary transition-colors flex items-center gap-1">
                     Need Help?
                   </a>
@@ -193,11 +168,82 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* Features Column (Desktop left side, Mobile second section right below sign-in card) */}
+          <div id="capabilities" className="w-full order-2 lg:order-1 lg:col-span-7 space-y-5 sm:space-y-8 text-left pr-0 lg:pr-6 pt-6 sm:pt-8 lg:pt-0">
+            {/* Desktop Branding Header (Hidden on mobile since mobile shows top header) */}
+            <div className="hidden lg:block space-y-4">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-extrabold uppercase tracking-wider">
+                <Compass className="w-3.5 h-3.5" />
+                NITC CSEA Portal
+              </span>
+              <h1 className="text-5xl lg:text-6xl font-black text-primary tracking-tight leading-none">
+                PermsPortal
+              </h1>
+              <p className="text-base sm:text-lg text-text-muted font-medium max-w-xl">
+                The centralized venue reservation and automated workflow approval system for the Computer Science & Engineering Association.
+              </p>
+            </div>
+
+            {/* Mobile section title with decorative line */}
+            <div className="block lg:hidden text-center pt-2">
+              <div className="inline-flex items-center justify-center gap-2 mb-1">
+                <div className="h-px w-8 bg-card-header/80" />
+                <p className="text-xs font-bold uppercase tracking-wider text-text-muted">
+                  Key Portal Capabilities
+                </p>
+                <div className="h-px w-8 bg-card-header/80" />
+              </div>
+            </div>
+
+            {/* Redesigned Feature Highlights Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 pb-8 lg:pb-0">
+              <div className="p-4 sm:p-5 rounded-2xl bg-surface/60 backdrop-blur-xs border border-card-header/50 shadow-xs hover:shadow-md hover:border-accent/40 transition-all flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-accent/15 text-accent flex items-center justify-center shrink-0">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <h3 className="font-bold text-sm text-text">Instant Availability</h3>
+                  <p className="text-xs text-text-muted leading-relaxed">Real-time scheduling grid with automated conflict detection.</p>
+                </div>
+              </div>
+
+              <div className="p-4 sm:p-5 rounded-2xl bg-surface/60 backdrop-blur-xs border border-card-header/50 shadow-xs hover:shadow-md hover:border-primary/40 transition-all flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <h3 className="font-bold text-sm text-text">Workflow Tracking</h3>
+                  <p className="text-xs text-text-muted leading-relaxed">Interactive timeline with live status updates and action logs.</p>
+                </div>
+              </div>
+
+              <div className="p-4 sm:p-5 rounded-2xl bg-surface/60 backdrop-blur-xs border border-card-header/50 shadow-xs hover:shadow-md hover:border-success/40 transition-all flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-success/20 text-emerald-700 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <h3 className="font-bold text-sm text-text">Multi-stage Approvals</h3>
+                  <p className="text-xs text-text-muted leading-relaxed">Seamless routing from Coordinators to Staff, Faculty, and HOD.</p>
+                </div>
+              </div>
+
+              <div className="p-4 sm:p-5 rounded-2xl bg-surface/60 backdrop-blur-xs border border-card-header/50 shadow-xs hover:shadow-md hover:border-secondary/40 transition-all flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
+                  <HelpCircle className="w-5 h-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <h3 className="font-bold text-sm text-text">Interactive Queries</h3>
+                  <p className="text-xs text-text-muted leading-relaxed">Clarify booking details directly through built-in query system.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="py-6 border-t border-card-header/40 text-center text-xs text-text-muted z-10 bg-background/50 backdrop-blur-sm">
+      <footer className="py-5 sm:py-6 border-t border-card-header/40 text-center text-xs text-text-muted z-10 bg-background/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
           <p>&copy; {new Date().getFullYear()} Computer Science & Engineering Association. All rights reserved.</p>
           <div className="flex gap-4">
